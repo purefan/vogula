@@ -6,15 +6,17 @@ I currently use PgAdmin for most postgresql management needs, but in spite of th
 ## Roadmap
 The project is in its infant state and things will probably change or just die out, but so far at least this is the plan:
 
-0. Minimal usability
-	0. Have a login screen
-	0. Create, update and delete connections to 1+ databases
-	0. Handle connections - be able to connect/disconnect
-	0. Be able to run arbitrary SQL queries
-0. Extended usability
-	0. SQL linter
-	0. Save/Load snippets
-	0. Theming - Be able to load css 
+1. Minimal usability
+
+	1. Have a login screen
+	2. Create, update and delete connections to 1+ databases
+	3. Handle connections - be able to connect/disconnect
+	4. Be able to run arbitrary SQL queries
+2. Extended usability
+
+	1. SQL linter
+	2. Save/Load snippets
+	3. Theming - Be able to load css 
 
 
 If you would like more features please use the issues feature for this project
