@@ -1,10 +1,11 @@
 {
   "name": "electron-quick-start",
   "version": "1.0.0",
-  "description": "A minimal Electron application",
+  "description": "A postgresql manager",
   "main": "main.js",
+  "homepage": ".",
   "scripts": {
-    "start-electron": "electron .",
+    "start-electron": "react-scripts build && electron .",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
