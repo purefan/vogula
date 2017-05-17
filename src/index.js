@@ -1,15 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-// import App from './App';
-import MyApp from './myApp';
+import App from './App';
 import './index.css';
 
-/*ReactDOM.render(
-	<App />,
-	document.getElementById('root-disabled')
-);*/
-
 ReactDOM.render(
-	<MyApp />,
+	<App />,
 	document.getElementById('root')	
 );
