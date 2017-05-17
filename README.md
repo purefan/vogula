@@ -1,5 +1,7 @@
 # PostgreSQL Manager
 
+[![Build Status](https://travis-ci.org/purefan/vogula.svg?branch=master)](https://travis-ci.org/purefan/vogula)
+
 ## Aim
 I currently use PgAdmin for most postgresql management needs, but in spite of the major respect I have for the good folks behind that project I do want something a little different, so this is an attempt at coming up with a more agile tool focused on a very small set of features.
 
