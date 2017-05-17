@@ -1,21 +1,35 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
 
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
-        </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-      </div>
-    );
-  }
+import Login from './login/Login';
+
+class App extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {user:''};
+	}
+
+	onChange = (user, password) => {
+		// TODO: Perform validation
+		const loginVal = {
+			user: "purefan2",
+			password: "password"
+		};
+		if(loginVal.user === user && loginVal.password === password){
+			this.setState({user: user});
+		}
+		//console.log(document.querySelector('input'));
+	};
+
+	render() {
+		return (
+			<div>
+				<Login 
+				user={this.state.user}
+				setUser={this.onChange}
+				/>
+			</div>
+		);
+	}
 }
 
 export default App;
