@@ -1,0 +1,20 @@
+.container > div{
+    float: left;
+    width: 40%;
+    padding: 1%;
+    margin: 2% 1%;
+    border: 1px solid #c1d5e0;
+    background-color: white;
+    color: #62757f;
+}
+
+.edit-link {
+    color: #67daff;
+    cursor: pointer;
+}
+
+.pull-right{
+    float: right;
+    color: #62757f;
+    cursor: pointer;
+}
