@@ -1,0 +1,22 @@
+.Connection {
+    width: 45%;
+    padding: 1%;
+    margin: 2% 1%;
+    border: 1px solid #c1d5e0;
+    background-color: #f5f5f5;
+}
+
+.disconnect {
+    color: #62757f;
+}
+
+.flex-connection-details{
+    display: flex;
+    justify-content: space-between;
+    margin: 5px;
+    flex-wrap: wrap;
+}
+
+.Connection .button {
+    margin: 0 5px;
+}

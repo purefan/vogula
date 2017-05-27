@@ -1,0 +1,37 @@
+exports[`test renders without crashing 1`] = `
+<div
+  className="App">
+  <div
+    className="Header">
+    <span
+      className="logo">
+      vogula
+    </span>
+    <a
+      className="button pull-right"
+      href="/manage"
+      onClick={[Function]}>
+      Edit Connections
+    </a>
+    <a
+      className="button pull-right"
+      href="/add"
+      onClick={[Function]}>
+      Add Connection
+    </a>
+    <a
+      className="button pull-right"
+      href="/"
+      onClick={[Function]}>
+      Dashboard
+    </a>
+  </div>
+  <div
+    className="Home">
+    <h3
+      className="no-connection">
+       No Connections 
+    </h3>
+  </div>
+</div>
+`;

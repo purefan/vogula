@@ -1,0 +1,27 @@
+.AddConnection {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+}
+
+.AddConnection form {
+    width: 750px;
+    padding: 25px;
+    margin: 15px;
+    display: flex;
+    flex-direction: column;
+    background: #eeeeee;
+}
+
+.AddConnection form > input {
+    border: none;
+    margin: 3px 0;
+    width: 735px;
+    height: 18px;
+    font-size: 18px;
+}
+
+.AddConnection form > div {
+    margin: 15px 0;
+}

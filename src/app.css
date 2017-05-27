@@ -1,0 +1,44 @@
+.App {
+    margin: 0 auto;
+}
+
+
+.delete-button {
+    margin: 0.5% 2%;
+    color: white;
+    cursor: pointer;
+    padding: 7px;
+    border: 1px solid white;
+    text-decoration: none;
+    text-shadow: 2px 1px #62757f;
+    background: #c4001d;
+}
+
+.button {
+    margin: 1% 2%;
+    color: white;
+    cursor: pointer;
+    padding: 10px;
+    border: 1px solid white;
+    text-decoration: none;
+    text-shadow: 2px 1px #62757f;
+    background: #83b9ff;
+}
+
+.pull-left{
+    float: left;
+    cursor: pointer;
+}
+
+.pull-right{
+    float: right;
+    cursor: pointer;
+}
+
+.block {
+    display: block;
+}
+
+.no-connection {
+    margin: 50px;
+}
