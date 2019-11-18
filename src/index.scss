@@ -1,0 +1,84 @@
+body {
+    background: #222;
+    color: #999;
+    height: 100vh;
+    margin: 0;
+    padding: 0
+}
+
+/** https://grid.layoutit.com/?id=MCfsaOL **/
+.grid-container {
+    display: grid;
+    height: 100vh;
+    grid-template-columns: 50vw 25vw 24vw;
+    grid-template-rows: 1fr 1fr;
+    grid-template-areas: "board-container pgn-container engine-container""board-container pgn-container db-container";
+}
+
+.board-container {
+    display: grid;
+    grid-template-columns: 50vw;
+    grid-template-rows: 90vh;
+    grid-template-areas: "board-container-chessground""board-container-toolbar";
+    grid-area: board-container;
+}
+
+.board-container-chessground {
+    grid-area: board-container-chessground;
+}
+
+.board-container-toolbar {
+    grid-area: board-container-toolbar;
+}
+
+.pgn-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-areas: "pgn-container-toolbar""pgn-container-headers""pgn-container-moves";
+    grid-area: pgn-container;
+}
+
+.pgn-container-toolbar {
+    grid-area: pgn-container-toolbar;
+}
+
+.pgn-container-headers {
+    grid-area: pgn-container-headers;
+}
+
+.pgn-container-moves {
+    grid-area: pgn-container-moves;
+}
+
+.engine-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+    grid-template-areas: "engine-container-toolbar""engine-container-analysis";
+    grid-area: engine-container;
+}
+
+.engine-container-toolbar {
+    grid-area: engine-container-toolbar;
+}
+
+.engine-container-analysis {
+    grid-area: engine-container-analysis;
+}
+
+.db-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+    grid-template-areas: "db-container-toolbar""db-container-data";
+    grid-area: db-container;
+}
+
+.db-container-toolbar {
+    grid-area: db-container-toolbar;
+}
+
+.db-container-data {
+    grid-area: db-container-data;
+}

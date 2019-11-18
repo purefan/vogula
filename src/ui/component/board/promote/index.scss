@@ -1,0 +1,83 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    transition: opacity 500ms;
+    z-index: 4;
+
+    /* Seems to be enough to cover even the pieces */
+    &.hidden {
+        visibility: hidden;
+        opacity: 0;
+        z-index: 0;
+    }
+
+
+    button {
+        width: 10vw;
+        height: 10vw;
+        background-position: center;
+        background: no-repeat scroll 0 0 transparent;
+        background-size: cover;
+
+        &.btn_wB {
+            background-image: url(../chessground/images/pieces/merida/wB.svg);
+        }
+
+        &.btn_wN {
+            background-image: url(../chessground/images/pieces/merida/wN.svg);
+        }
+
+        &.btn_wR {
+            background-image: url(../chessground/images/pieces/merida/wR.svg);
+        }
+
+        &.btn_wQ {
+            background-image: url(../chessground/images/pieces/merida/wQ.svg);
+        }
+
+        &.btn_bN {
+            background-image: url(../chessground/images/pieces/merida/bN.svg);
+        }
+
+        &.btn_bB {
+            background-image: url(../chessground/images/pieces/merida/bB.svg);
+        }
+
+        &.btn_bR {
+            background-image: url(../chessground/images/pieces/merida/bR.svg);
+        }
+
+        &.btn_bQ {
+            background-image: url(../chessground/images/pieces/merida/bQ.svg);
+        }
+    }
+}
+
+.overlay:target {
+    visibility: visible;
+    opacity: 1;
+}
+
+.popup {
+    margin: 70px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 5px;
+    width: 40vw;
+    position: relative;
+    transition: all 5s ease-in-out;
+}
+
+@media screen and (max-width: 700px) {
+    .box {
+        width: 70%;
+    }
+
+    .popup {
+        width: 70%;
+    }
+}
