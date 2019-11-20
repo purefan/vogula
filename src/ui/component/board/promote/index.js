@@ -1,5 +1,6 @@
 const m = require('mithril')
 const board = require('../chessground') // for state
+const moves = require('../../pgn/moves')
 
 require('./index.scss')
 const promote = {
@@ -22,15 +23,6 @@ const promote = {
 
 module.exports = promote
 
-const letter_to_role = {
-    N: 'knight',
-    B: 'bishop',
-    R: 'rook',
-    Q: 'queen'
-}
-
-
-
 function make_btn_choose_piece(param) {
     return m('button', {
         class: `btn_${param.piece}`,
@@ -40,7 +32,15 @@ function make_btn_choose_piece(param) {
                 to: board.move_in_transit.dest,
                 promotion: param.piece.charAt(1).toLowerCase()
             }
-            board.chessjs.move(promote_params)
+            const move = Object.assign(
+                {},
+                {
+                    fen: board.chessjs.fen()
+                },
+                promote_params,
+                board.chessjs.move(promote_params)
+            )
+            moves.make_move(move)
             board.sync()
 
             promote.is_hidden = true

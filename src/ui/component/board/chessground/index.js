@@ -1,6 +1,7 @@
 const Chessground = require("chessground").Chessground
 const m = require('mithril')
 const chessjs = require('chess.js')
+const moves = require('../../pgn/moves')
 
 require('./chessground.scss')
 require('./theme.scss')
@@ -34,16 +35,31 @@ Board.config = {
         showDests: true,
         events: {
             after: (src, dest, meta) => {
-                Board.move_in_transit = { src, dest }
+                Board.move_in_transit = {
+                    src,
+                    dest,
+                    piece: Board.chessjs.get(src),
+                    from: make_square_description(src),
+                    to: make_square_description(dest)
+                }
                 if (is_promote({ src, dest })) {
+                    // Updating the visual list of moves happens in promote
                     const promote = require('../promote')
                     promote.is_hidden = false
                     m.redraw()
                     return true
                 }
-                console.log('--> piece from', Board.chessjs.get(src))
-                const move = Board.chessjs.move({ from: src, to: dest })
-                console.log('events.after', src, dest, meta)
+                const move = Object.assign(
+                    {},
+                    {
+                        fen: Board.chessjs.fen()
+                    },
+                    Board.chessjs.move({ from: src, to: dest })
+                )
+                moves.make_move(move)
+                if (move.flags == 'e') {
+                    Board.sync()
+                }
                 console.log('chessjs move', move)
 
                 Board.chessground.set({
@@ -55,6 +71,21 @@ Board.config = {
                 })
             }
         }
+    }
+}
+
+/**
+ *
+ * @param {String} square <col><row>
+ */
+function make_square_description(square) {
+    const chessjs_square = Board.chessjs.get(square)
+    return {
+        piece: chessjs_square != null ? chessjs_square.type : null,
+        piece_color: chessjs_square != null ? chessjs_square.color : null,
+        col: square.charAt(0),
+        col_number: square.charCodeAt(0) - 96, // A:1
+        row: Number(square.charAt(1))
     }
 }
 
@@ -111,6 +142,7 @@ Board.sync = () => {
                     dests: Board.make_dests(Board.chessjs)
                 })
         })
+    console.log('fixed config', fixed_config)
     Board.chessground.set(fixed_config)
 }
 
