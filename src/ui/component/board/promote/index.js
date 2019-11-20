@@ -34,11 +34,11 @@ function make_btn_choose_piece(param) {
             }
             const move = Object.assign(
                 {},
+                promote_params,
+                board.chessjs.move(promote_params),
                 {
                     fen: board.chessjs.fen()
-                },
-                promote_params,
-                board.chessjs.move(promote_params)
+                }
             )
             moves.make_move(move)
             board.sync()

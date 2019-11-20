@@ -1,5 +1,7 @@
 const m = require('mithril')
+const engine = require('../../engine/analysis')
 require('./index.scss')
+
 /**
  * How we internally store a move that will be displayed in the pgn viewer.
  * color is inferred from halfmove: halfmove % 2 == 0 ---> black
@@ -34,6 +36,9 @@ function make_id() {
 }
 
 /**
+ * 2 triggers for this function:
+ * /component/board/chessground -> onafter
+ * /component/board/promote
  * @param {Object} param
  * @param {String} param.color 'white' | 'black'
  * @param {String} param.fen
@@ -59,6 +64,7 @@ pgn_moves.make_move = param => {
     pgn_moves.halfmove++
 
     pgn_moves.current_move = move.id
+    engine.fetch_analysis(move.fen_after_move)
     m.redraw()
 }
 

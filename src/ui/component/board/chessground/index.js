@@ -51,10 +51,10 @@ Board.config = {
                 }
                 const move = Object.assign(
                     {},
-                    {
+                    Board.chessjs.move({ from: src, to: dest }),
+                    { // the position in the .assign is important
                         fen: Board.chessjs.fen()
-                    },
-                    Board.chessjs.move({ from: src, to: dest })
+                    }
                 )
                 moves.make_move(move)
                 if (move.flags == 'e') {
