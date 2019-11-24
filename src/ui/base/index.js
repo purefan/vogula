@@ -18,37 +18,16 @@ const Base = {
       ]),
       m('div.engine-container', [
         m('div.engine-container-toolbar', m(engine.toolbar)),
-        m('div.engine-container-analysis', m(engine.analysis))
+        m('div.engine-container-analysis', m(engine.analysis)),
+        m('div.engine-container-status', 'engine-status')
       ]),
       m('div.db-container', [
         m('div.db-container-toolbar', 'db-toolbar'),
-        m('div.db-container-data', 'db-data')
+        m('div.db-container-data', 'db-data'),
+        m('div.db-container-status', 'db-status')
       ])
     ])
   ])
 }
 
 module.exports = Base
-
-/**
- *
- <div class="grid-container">
-  <div class="board-container">
-    <div class="board-container-chessground"></div>
-    <div class="board-container-toolbar"></div>
-  </div>
-  <div class="pgn-container">
-    <div class="pgn-container-toolbar"></div>
-    <div class="pgn-container-headers"></div>
-    <div class="pgn-container-moves"></div>
-  </div>
-  <div class="engine-container">
-    <div class="engine-container-toolbar"></div>
-    <div class="engine-container-analysis"></div>
-  </div>
-  <div class="db-container">
-    <div class="db-container-toolbar"></div>
-    <div class="db-container-data"></div>
-  </div>
-</div>
- */

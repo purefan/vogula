@@ -6,7 +6,7 @@ body {
     padding: 0
 }
 
-/** https://grid.layoutit.com/?id=MCfsaOL **/
+/** https://grid.layoutit.com/?id=Iz9Bjqu **/
 .grid-container {
     display: grid;
     height: 100vh;
@@ -54,13 +54,17 @@ body {
 .engine-container {
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: 1fr 1fr;
-    grid-template-areas: "engine-container-toolbar""engine-container-analysis";
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-areas: "engine-container-toolbar""engine-container-analysis""engine-container-status";
     grid-area: engine-container;
 }
 
 .engine-container-toolbar {
     grid-area: engine-container-toolbar;
+}
+
+.engine-container-status {
+    grid-area: engine-container-status;
 }
 
 .engine-container-analysis {
@@ -70,8 +74,8 @@ body {
 .db-container {
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: 1fr 1fr;
-    grid-template-areas: "db-container-toolbar""db-container-data";
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-areas: "db-container-toolbar""db-container-data""db-container-status";
     grid-area: db-container;
 }
 
@@ -81,4 +85,8 @@ body {
 
 .db-container-data {
     grid-area: db-container-data;
+}
+
+.db-container-status {
+    grid-area: db-container-status;
 }
