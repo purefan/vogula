@@ -90,3 +90,91 @@ body {
 .db-container-status {
     grid-area: db-container-status;
 }
+
+.hidden {
+    visibility: hidden;
+    opacity: 0;
+}
+
+.visible {
+    visibility: visible;
+    opacity: 1;
+}
+
+/** Table */
+.table {
+    display: table;
+}
+
+.tr {
+    display: table-row;
+}
+
+.td {
+    display: table-cell;
+}
+
+/************* Modal ****************/
+.modal {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    transition: opacity 500ms;
+}
+
+.modal-content {
+    z-index: 10;
+    margin: 70px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 5px;
+    width: 30%;
+    position: relative;
+    transition: all 5s ease-in-out;
+}
+
+/*********** On off switch ***********/
+input.onoff[type=checkbox] {
+    height: 0;
+    width: 0;
+    visibility: hidden;
+}
+
+label.onoff {
+    cursor: pointer;
+    text-indent: -9999px;
+    width: 50px;
+    height: 25px;
+    background: grey;
+    display: block;
+    border-radius: 25px;
+    position: relative;
+}
+
+label.onoff:after {
+    content: '';
+    position: absolute;
+    top: 1.7px;
+    left: 1.7px;
+    width: 22.5px;
+    height: 22.5px;
+    background: #fff;
+    border-radius: 22.5px;
+    transition: 0.3s;
+}
+
+input.onoff:checked+label {
+    background: #bada55;
+}
+
+input.onoff:checked+label:after {
+    left: calc(100% - 2.5px);
+    transform: translateX(-100%);
+}
+
+label.onoff:active:after {
+    width: 32.5px;
+}

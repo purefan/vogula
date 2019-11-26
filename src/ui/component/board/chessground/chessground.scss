@@ -104,7 +104,7 @@ cg-board square.current-premove {
   width: 12.5%;
   height: 12.5%;
   background-size: cover;
-  z-index: 2;
+  /* z-index: 2;  Testing if removing this works still, kinda needed for the settings overlay*/
   will-change: transform;
   pointer-events: none;
 }

@@ -8,12 +8,4 @@
         display: block;
 
     }
-
-    @mixin col-x {
-        @for $i from 1 through 10 {
-            .width-#{30 + $i} {
-                width: 300 + (50 * $i);
-            }
-        }
-    }
 }

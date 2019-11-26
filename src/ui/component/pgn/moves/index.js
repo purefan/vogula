@@ -1,5 +1,5 @@
 const m = require('mithril')
-const engine = require('../../engine/analysis')
+const engine = require('../../engine/actions')
 require('./index.scss')
 
 /**
@@ -62,10 +62,10 @@ pgn_moves.make_move = param => {
     }
 
     pgn_moves.halfmove++
+    m.redraw()
 
     pgn_moves.current_move = move.id
-    engine.fetch_analysis(move.fen_after_move)
-    m.redraw()
+    engine.fetch_analysis(move.fen_after_move) // just trigger it, side-effects yeah I know...
 }
 
 /**
