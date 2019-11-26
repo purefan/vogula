@@ -19,14 +19,17 @@ const Settings = {
                 m('div.td', 'Resker Automatic Depth Goal:'),
                 m('div.td', m('input', {
                     type: 'text', onkeyup: e => localStorage.setItem('settings.engine.resker.auto_depth_goal', e.target.value),
-                    value: localStorage.getItem('setting.engine.resker.auto_depth_goal')
+                    value: localStorage.getItem('settings.engine.resker.auto_depth_goal')
                 }))
             ]),
             m('div.tr', [
                 m('div.td', 'Resker Api Key:'),
                 m('div.td', m('input', {
-                    type: 'text', onkeyup: e => localStorage.setItem('settings.engine.resker.api_key', e.target.value),
-                    value: localStorage.getItem('setting.engine.resker.api_key')
+                    type: 'text', onchange: e => {
+                        console.log('Saving api key', e.target.value)
+                        localStorage.setItem('settings.engine.resker.api_key', e.target.value)
+                    },
+                    value: localStorage.getItem('settings.engine.resker.api_key')
                 }))
             ]),
             m('div.tr', [

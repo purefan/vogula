@@ -19,7 +19,7 @@ const Base = {
       m('div.engine-container', [
         m('div.engine-container-toolbar', m(engine.toolbar)),
         m('div.engine-container-analysis', m(engine.analysis)),
-        m('div.engine-container-status', 'engine-status')
+        m('div.engine-container-status', m(engine.status))
       ]),
       m('div.db-container', [
         m('div.db-container-toolbar', 'db-toolbar'),
