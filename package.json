@@ -5,14 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha",
-    "build": "nodemon"
-  },
-  "nodemonConfig": {
-    "ignore": [
-      "dist"
-    ],
-    "exec": "$(npm bin)/webpack",
-    "ext": "js css scss"
+    "build": "$(npm bin)/webpack --watch"
   },
   "author": "",
   "license": "ISC",
@@ -46,7 +39,6 @@
     "mithril": "^2.0.4",
     "mithril-datepicker": "^0.9.3",
     "node-sass": "^4.13.0",
-    "nodemon": "^1.19.4",
     "sass-loader": "^7.3.1",
     "style-loader": "^1.0.0",
     "webpack": "^4.41.2"
