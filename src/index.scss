@@ -71,6 +71,7 @@ $toolbar-height: 5vh;
 
 .engine-container-analysis {
     grid-area: engine-container-analysis;
+    overflow: auto;
 }
 
 .db-container {
@@ -119,6 +120,8 @@ $toolbar-height: 5vh;
 }
 
 /************* Modal ****************/
+$modal-content-width: 30vw;
+
 .modal {
     position: fixed;
     top: 0;
@@ -135,7 +138,7 @@ $toolbar-height: 5vh;
     padding: 20px;
     background: #fff;
     border-radius: 5px;
-    width: 30%;
+    width: $modal-content-width;
     position: relative;
     transition: all 5s ease-in-out;
 }

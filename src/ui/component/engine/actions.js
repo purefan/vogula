@@ -3,6 +3,11 @@
  */
 const m = require('mithril')
 const stream = require('mithril/stream')
+
+/**
+ * @property {mithril/stream} status -
+ * @property {mithril/stream} analysis - Used to display analysis from Resker
+ */
 const EngineActions = {
     status: stream('idle'),
     analysis: stream({}),
@@ -16,10 +21,11 @@ const EngineActions = {
 * @param {Number} [priority=40]
 */
 async function add_to_queue(param) {
+    const pgn_moves = require('../pgn/moves')
     param = Object.assign({}, { depth_goal: 40, priority: 10 }, param)
     assert_valid_key()
-    analysis.status('Queuing')
-    const current_move = moves.moves.find(move => move.id == moves.current_move)
+    EngineActions.status('Queuing')
+    const current_move = pgn_moves.moves.find(move => move.id == pgn_moves.current_move)
     const res = await m.request({
         method: 'POST',
         url: localStorage.getItem('settings.engine.resker.host') + '/position',
@@ -32,7 +38,7 @@ async function add_to_queue(param) {
             priority: param.priority || 10 // resker has a bug, it sets this to 5 all the time
         }
     })
-    analysis.status('idle')
+    EngineActions.status('idle')
 }
 
 
@@ -41,42 +47,36 @@ async function add_to_queue(param) {
  * @param {String} fen
  */
 async function fetch_analysis(fen) {
-    console.log('fetching analysis for ', fen)
+    const pgn_moves = require('../pgn/moves')
+    console.log('[Engine::fetch_analysis] fetching analysis for ', fen)
     assert_valid_key()
     EngineActions.status('fetching')
     // @todo implement caching
-    try {
-        const res = await m.request({
-            method: 'GET',
-            url: localStorage.getItem('settings.engine.resker.host') + '/position',
-            headers: {
-                'x-api-key': localStorage.getItem('settings.engine.resker.api_key'),
-                fen
-            }
+    const res = await m.request({
+        method: 'GET',
+        url: localStorage.getItem('settings.engine.resker.host') + '/position',
+        headers: {
+            'x-api-key': localStorage.getItem('settings.engine.resker.api_key'),
+            fen
+        }
+    })
+    EngineActions.status('idle')
+    console.log('[Engine::fetch_analysis] First fetch:', res)
+    EngineActions.analysis(res)
+    if (!res) {
+        EngineActions.analysis(Object.assign(
+            { status: 0 },
+            res
+        ))
+        console.log('[Engine::fetch_analysis] auto-queuing')
+        await add_to_queue({
+            depth_goal: 30,
+            priority: 1
         })
-        EngineActions.status('idle')
-        console.log('[Engine::fetch_analysis]', res)
+        fetch_analysis(fen)
+    } else {
+        console.log('[Engine::fetch_analysis] Fetched analysis and streaming it:', res)
         EngineActions.analysis(res)
-        if (!res) {
-            EngineActions.analysis(Object.assign(
-                { status: 0 },
-                res
-            ))
-            console.log('auto-queuing')
-            await add_to_queue({
-                depth_goal: 30,
-                priority: 1
-            })
-            fetch_analysis(move.fen_after_move)
-        } else {
-            console.log('fetch_analysis res', res)
-            EngineActions.analysis(res)
-        }
-    } catch (error) {
-        if (error.code == 401) {
-
-        }
-        console.log('error fetching analysis ' + error.code + ': ' + error.message)
     }
 
 }
