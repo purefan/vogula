@@ -4,4 +4,8 @@ div.move_list {
     span.move {
         margin-right: 6px;
     }
+
+    .current_move {
+        border-bottom: 1px solid #999;
+    }
 }

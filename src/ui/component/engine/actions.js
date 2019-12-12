@@ -25,7 +25,7 @@ async function add_to_queue(param) {
     param = Object.assign({}, { depth_goal: 40, priority: 10 }, param)
     assert_valid_key()
     EngineActions.status('Queuing')
-    const current_move = pgn_moves.moves.find(move => move.id == pgn_moves.current_move)
+    const current_move = pgn_moves.moves.find(move => move.id == pgn_moves.current_move())
     const res = await m.request({
         method: 'POST',
         url: localStorage.getItem('settings.engine.resker.host') + '/position',

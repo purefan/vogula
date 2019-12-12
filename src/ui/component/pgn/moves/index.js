@@ -1,4 +1,5 @@
 const m = require('mithril')
+const stream = require('mithril/stream')
 const engine = require('../../engine/actions')
 require('./index.scss')
 
@@ -24,7 +25,7 @@ require('./index.scss')
 const pgn_moves = {
     moves: [],
     halfmove: 1, // starts at 1
-    current_move: null, // points to one moves[ <id> ]
+    current_move: stream(''), // points to one moves[ <id> ]
     view: () => m('div.move_list', make_move_list())
 }
 
@@ -36,6 +37,7 @@ function make_id() {
 }
 
 /**
+ * Appends a move to pgn_moves.moves
  * 2 triggers for this function:
  * /component/board/chessground -> onafter
  * /component/board/promote
@@ -55,7 +57,7 @@ pgn_moves.make_move = param => {
 
     if (pgn_moves.halfmove < (pgn_moves.moves.length + 1)) {
         // user is looking at "not the last move"
-        const append_at = pgn_moves.moves.find(move => move.id == pgn_moves.current_move)
+        const append_at = pgn_moves.moves.find(move => move.id == pgn_moves.current_move())
         append_at.push(move)
     } else {
         pgn_moves.moves.push(move)
@@ -64,7 +66,7 @@ pgn_moves.make_move = param => {
     pgn_moves.halfmove++
     m.redraw()
 
-    pgn_moves.current_move = move.id
+    pgn_moves.current_move(move.id)
     engine.fetch_analysis(move.fen_after_move) // just trigger it, side-effects yeah I know...
 }
 
@@ -76,7 +78,7 @@ function make_move_list(depth) {
     return pgn_moves.moves.map(move => {
         console.log('make_move_list', move)
         return m('span', {
-            class: 'move'
+            class: 'move' + (pgn_moves.current_move() == move.id ? ' current_move' : '')
         }, move.halfmove % 2 == 1 ? `${Math.ceil(move.halfmove / 2)}.${move.san}` : ` ${move.san}`)
     })
 }
