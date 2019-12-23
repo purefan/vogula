@@ -5,22 +5,28 @@ const Actions = require('../actions')
 const Status = {
 
     view: () => m('div.engine_status', [
-        Actions.analysis().status == 0 ? show_not_found() : null,
-        Actions.analysis().status == 1 ? show_in_progess() : null,
-        Actions.analysis().status == 2 ? show_in_analysis() : null
+        format_status(Actions.status())
     ])
 }
 
 module.exports = Status
 
-function show_not_found() {
-    return m('div', { class: 'not_found ' + Actions.status() }, 'This position is queued to be analyzed - ' + Actions.status())
-}
+function format_status(status) {
+    if (status == 0) {
+        return m('div', { class: 'analysis engine_status_' + status }, 'Analysis queued')
+    }
 
-function show_in_progess() {
-    return m('div', { class: 'in_progress ' + Actions.status() }, 'This position is being analyzed - ' + Actions.status())
-}
+    if (status == 1) {
+        return m('div', { class: 'analysis engine_status_' + status }, 'Analysis in progress')
+    }
 
-function show_in_analysis() {
-    return m('div', { class: 'analysis ' + Actions.status() }, 'This is the analysis - ' + Actions.status())
+    if (status == 2) {
+        return m('div', { class: 'analysis engine_status_' + status }, 'Analysis completed')
+    }
+
+    if (status == 'idle') {
+        return m('div', { class: 'analysis engine_status_' + status }, 'Idle')
+    }
+
+    return m('div', { class: 'analysis' }, ' Unformated status ' + status)
 }

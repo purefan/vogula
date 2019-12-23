@@ -60,9 +60,9 @@ async function fetch_analysis(fen) {
             fen
         }
     })
-    EngineActions.status('idle')
+
     console.log('[Engine::fetch_analysis] First fetch:', res)
-    EngineActions.analysis(res)
+    EngineActions.analysis(res) // Displays or visually clears the analysis lines
     if (!res) {
         EngineActions.analysis(Object.assign(
             { status: 0 },
@@ -77,6 +77,7 @@ async function fetch_analysis(fen) {
     } else {
         console.log('[Engine::fetch_analysis] Fetched analysis and streaming it:', res)
         EngineActions.analysis(res)
+        EngineActions.status(res.status)
     }
 
 }
