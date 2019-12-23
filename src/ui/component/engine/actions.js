@@ -33,7 +33,7 @@ async function add_to_queue(param) {
             'x-api-key': localStorage.getItem('settings.engine.resker.api_key')
         },
         body: {
-            fen: current_move.fen_after_move,
+            fen: current_move.fen,
             depth_goal: param.depth_goal || 40,
             priority: param.priority || 10 // resker has a bug, it sets this to 5 all the time
         }

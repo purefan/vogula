@@ -1,8 +1,10 @@
 div.move_list {
     color: #999;
+    clear: both;
 
     span.move {
         margin-right: 6px;
+        text-align: center;
     }
 
     .current_move {

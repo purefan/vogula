@@ -1,33 +1,25 @@
 const m = require('mithril')
 const stream = require('mithril/stream')
 const engine = require('../../engine/actions')
+const PGN = require('../../../../lib/pgn')
+
 require('./index.scss')
 
 /**
- * How we internally store a move that will be displayed in the pgn viewer.
- * color is inferred from halfmove: halfmove % 2 == 0 ---> black
- * @typedef PGNMove
- * @property {String} id - Unique move identifier
- * @property {String} fen_after_move - How the board looks after making this move
- * @property {String} san - human readable format
- * @property {Number} halfmove - starting from 1 according to standards
- * @property {PGNMove[]} ravs - variations stemming from this position
- */
-
-
-/**
  * Keeps all the moves in the active game, knowing variations and fens
- * moves is an array of moves, these items match the halfmove-1 due to array index
+ * moves is an array of PGNMove, these items match the halfmove-1 due to array index
  * moves = [ {
- *      fen_after_move: String
+ *      fen: String
  * }, {}, {}]
  */
 const pgn_moves = {
+    import_pgn,
+    move_list: new PGN.MovesList(),
     moves: [],
     halfmove: 1, // starts at 1
     current_move: stream(''), // points to one moves[ <id> ]
-    view: () => m('div.move_list', make_move_list())
 }
+pgn_moves.view = () => m('div.move_list', pgn_moves.move_list.vnodes())
 
 /**
  * These ids make it a direct access between a move and its parent and any possible variations
@@ -47,34 +39,24 @@ function make_id() {
  * @param {String} param.san
  */
 pgn_moves.make_move = param => {
-    const move = {
-        id: make_id(),
-        fen_after_move: param.fen,
-        san: param.san,
-        halfmove: pgn_moves.halfmove,
-        ravs: []
-    }
+    console.log('make move', param)
+    const move = new PGN.Move({
+        fen: param.fen,
+        san: param.san
+    })
 
-    if (pgn_moves.halfmove < (pgn_moves.moves.length + 1)) {
-        // user is looking at "not the last move"
-        const append_at = pgn_moves.moves.find(move => move.id == pgn_moves.current_move())
-        append_at.push(move)
-    } else {
-        pgn_moves.moves.push(move)
-    }
+    pgn_moves.move_list.add_move(move)
 
-    pgn_moves.halfmove++
     m.redraw()
 
     pgn_moves.current_move(move.id)
-    engine.fetch_analysis(move.fen_after_move) // just trigger it, side-effects yeah I know...
+    engine.fetch_analysis(move.fen) // just trigger it, side-effects yeah I know...
 }
 
 /**
  *
- * @param {Number} depth tells the depth of the variation we're in
  */
-function make_move_list(depth) {
+function make_move_list() {
     return pgn_moves.moves.map(move => {
         console.log('make_move_list', move)
         return m('span', {
@@ -83,4 +65,21 @@ function make_move_list(depth) {
     })
 }
 
+function import_pgn(pgn) {
+    /* const chess = new Chess()
+    chess.load_pgn(pgn)
+    console.log('[import_pgn]', chess.history())
+    const copy_chess = new Chess()
+    const moves = chess.history().map(san => {
+        copy_chess.move(san)
+        return new PGN.Move({ san, fen: copy_chess.fen() })
+    }) */
+    const move_list = new PGN.MovesList()
+    move_list.import_pgn(pgn)
+    for (move in moves) {
+        move_list.add_move(moves[ move ])
+    }
+    console.log('--> print')
+    move_list.print()
+}
 module.exports = pgn_moves
