@@ -18,7 +18,7 @@ require('./index.scss')
 const Board = {}
 
 Board.config = {
-    orientation: 'white',
+    orientation: localStorage.getItem('board.orientation') || 'white',
     coordinates: true,
     autoCastle: true,
     turnColor: 'white',
