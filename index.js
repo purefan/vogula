@@ -3,6 +3,9 @@ const path = require('path')
 const url = require('url')
 
 let win
+try {
+    require('electron-reloader')(module);
+} catch (_) { }
 
 function createWindow() {
     // Create the browser window.
