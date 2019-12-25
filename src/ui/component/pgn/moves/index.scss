@@ -2,6 +2,10 @@ div.move_list {
     color: #999;
     clear: both;
 
+    .move {
+        cursor: pointer;
+    }
+
     span.move {
         margin-right: 6px;
         text-align: center;
@@ -9,5 +13,10 @@ div.move_list {
 
     .current_move {
         border-bottom: 1px solid #999;
+    }
+
+    .rav {
+        border-left: 1px solid #999;
+        padding-left: 6px;
     }
 }

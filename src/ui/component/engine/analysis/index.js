@@ -32,7 +32,6 @@ window.engine = Engine
  * @param {Object} result
  */
 function format_analysis(result) {
-    console.log('result --> ', result)
     return result.steps.filter(step => step.depth == result.depth).map(step => m('div.tr', [
         m('div.td', step.score.value),
         m('div.td', step.depth),

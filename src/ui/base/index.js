@@ -4,12 +4,12 @@ const pgn = require('../component/pgn')
 const promote = require('../component/board/promote') // Needed here because chessground overtakes the component
 const engine = require('../component/engine')
 const Base = {
-  view: vnode => m('div', [
+  view: () =>
     m('div.grid-container', [
       m(promote),
       m('div.board-container', [
         m('div.board-container-chessground', m(board.chessground)),
-        m('div.board-container-toolbar', 'board-toolbar')
+        m('div.board-container-toolbar', m(board.toolbar))
       ]),
       m('div.pgn-container', [
         m('div.pgn-container-toolbar', 'pgn-toolbar'),
