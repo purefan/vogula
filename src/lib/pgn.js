@@ -130,25 +130,35 @@ class MovesList {
     /**
      *
      * @param {Move} move
+     * @param {Move} last_move - Used to avoid printing duplicates
      */
-    make_vnode_line(move) {
+    make_vnode_line(move, last_move) {
         if (!move || move == undefined) {
             throw new Error('[PGN::make_vnode_line] Move is not valid')
         }
+        console.log('----> make_vnode_line last', move, last_move)
         let list = []
 
-        if (move.san) {
+        // Append this move: e.g: 1.d4
+        if (move.san && (!last_move || move.id != last_move.id)) {
             console.log('[PGN::make_vnode_line] list.push because move.san')
             list.push(move.make_vnode({ current_move: this.current_move() }))
         }
+
+        // Add the line starting with 1...Nf6
         if (move.next_move) {
-            console.log('[PGN::make_vnode_line] move.next_move', move.next_move)
-            list = list.concat(this.make_vnode_line(this.moves[ move.next_move ]))
+            list.push(this.moves[ move.next_move ].make_vnode({ current_move: this.current_move() }))
         }
 
+        // If there are variations to 1...Nf6, add them
         if (move.ravs.length > 0) {
             console.log('[PGN::make_vnode_line] RAVing')
             move.ravs.map(rav => list.push(m('div.rav.tree-branch', [ m('span', '('), this.make_vnode_line(this.moves[ rav ]), m('span', ')') ])))
+        }
+
+        if (move.next_move) {
+            console.log('[PGN::make_vnode_line] move.next_move', move.next_move)
+            list = list.concat(this.make_vnode_line(this.moves[ move.next_move ], this.moves[ move.next_move ]))
         }
 
         return list
