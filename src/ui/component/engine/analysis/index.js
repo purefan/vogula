@@ -32,11 +32,19 @@ window.engine = Engine
  * @param {Object} result
  */
 function format_analysis(result) {
-    return result.steps.filter(step => step.depth == result.depth).map(step => m('div.tr', [
-        m('div.td', step.score.value),
-        m('div.td', step.depth),
-        m('div.td', step.pv)
-    ]))
+    return result.steps
+        .filter(step => step.depth == result.depth)
+        .reduce((acc, curr) => {
+            if (!acc.find(looking => looking.pv == curr.pv)) {
+                acc.push(curr)
+            }
+            return acc
+        }, [])
+        .map(step => m('div.tr', [
+            m('div.td', step.score.value),
+            m('div.td', step.depth),
+            m('div.td', step.pv)
+        ]))
 }
 
 
