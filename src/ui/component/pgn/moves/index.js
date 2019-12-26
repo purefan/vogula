@@ -16,7 +16,7 @@ const pgn_moves = {
     move_list: new PGN.MovesList(),
     current_move
 }
-pgn_moves.view = () => m('div.move_list', pgn_moves.move_list.vnodes())
+pgn_moves.view = () => m('div.move_list.tree-branch', pgn_moves.move_list.vnodes())
 function current_move(id) {
     if (id) {
         pgn_moves.move_list.current_move(id)

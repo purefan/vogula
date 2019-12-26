@@ -1,4 +1,3 @@
-const Chess = require('chess.js')
 const m = require('mithril')
 const stream = require('mithril/stream')
 
@@ -7,16 +6,16 @@ class MovesList {
         this.moves = {}
         this.vnodes = stream(m('div', '<no moves>'))
         this.half_move = -1
+        this.current_move = stream()
         const initial_position = new Move({
             san: '',
             fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
         })
         this.add_move(initial_position)
-        this.current_move = initial_position.id
     }
 
     get next_move() {
-        return this.moves[ this.moves[ this.current_move ].next_move ] || false
+        return this.moves[ this.moves[ this.current_move() ].next_move ] || false
     }
 
     /**
@@ -24,52 +23,69 @@ class MovesList {
      * @param {Move} move
      */
     add_move(move) {
-        console.log('add_move(', move)
-        if (move.id == this.current_move) {
+        console.log('PGN::add_move(', move)
+        if (move.id == this.current_move()) {
             throw new Error('1. Duplicating move', this.moves)
         }
-        if (this.current_move && this.moves[ this.current_move ].previous_move == move.id) {
+        if (this.current_move() && this.moves[ this.current_move() ].previous_move == move.id) {
             throw new Error('2. Duplicating previous move', this.moves)
         }
-        if (this.current_move && this.moves[ this.current_move ].next_move == move.id) {
+        if (this.current_move() && this.moves[ this.current_move() ].next_move == move.id) {
             throw new Error('3. Duplicating next move', this.moves)
         }
 
-        move.previous_move = this.current_move
+        move.previous_move = this.current_move()
         this.half_move++
-        move.half_move = this.half_move
+        move.half_move = this.count_half_moves_before()
         this.moves[ move.id ] = move
         // is this a RAV?
-        if (this.current_move && this.moves[ this.current_move ].next_move) {
-            console.log('[add_move] has next, rav-ing')
-            this.moves[ this.current_move ].ravs.push(move.id)
-            this.current_move = move.id
+        if (this.current_move() && this.moves[ this.current_move() ].next_move) {
+            console.log('[PGN::add_move] has next, rav-ing')
+            this.moves[ this.current_move() ].ravs.push(move.id)
+            this.moves[ move.id ].is_first_move_in_rav = true
+            this.current_move(move.id)
         } else {
-            console.log('[add_move] No next_move')
-            this.current_move = move.id
-            if (this.moves[ this.current_move ].previous_move && !this.moves[ this.current_move ].next_move) {
-                this.moves[ this.moves[ this.current_move ].previous_move ].next_move = move.id
+            console.log('[PGN::add_move] No next_move')
+            this.current_move(move.id)
+            if (this.moves[ this.current_move() ].previous_move && !this.moves[ this.current_move() ].next_move) {
+                this.moves[ this.moves[ this.current_move() ].previous_move ].next_move = move.id
             }
         }
         this.update_vnodes()
     }
 
+    count_half_moves_before() {
+        let total = 1
+        let current = this.current_move()
+        if (!current) return total
+        while (this.moves[ current ].previous_move) {
+            total++
+            current = this.moves[ current ].previous_move
+        }
+        return total
+    }
+
+    get current_fen() {
+        console.log('[PGN::current_fen] ', this.moves[ this.current_move() ])
+        return this.moves[ this.current_move() ].fen
+    }
+
     get first_move() {
         while (this.move_backward());
-        return this.moves[ this.current_move ]
+        return this.moves[ this.current_move() ]
     }
 
     move_forward() {
-        if (this.moves[ this.current_move ].next_move) {
-            this.current_move = this.moves[ this.current_move ].next_move
+        if (this.moves[ this.current_move() ].next_move) {
+            this.current_move(this.moves[ this.current_move() ].next_move)
             return true
         }
         return false
     }
 
     move_backward() {
-        if (this.moves[ this.current_move ].previous_move) {
-            this.current_move = this.moves[ this.current_move ].previous_move
+        if (this.moves[ this.current_move() ].previous_move) {
+            this.current_move(this.moves[ this.current_move() ].previous_move)
             return true
         }
         return false
@@ -99,11 +115,14 @@ class MovesList {
     }
 
     update_vnodes() {
-        // rewind
-        while (this.move_backward());
-        const current_move = this.moves[ this.current_move ]
+        // find the first move
+        let current_move = this.moves[ this.current_move() ]
+        while (current_move.previous_move) {
+            current_move = this.moves[ current_move.previous_move ]
+        }
+
         let new_vnodes = this.make_vnode_line(current_move)
-        console.log('[update_vnodes] Updating vnodes', new_vnodes)
+        console.log('[PGN::update_vnodes] Updating vnodes', new_vnodes)
         this.vnodes(new_vnodes)
 
     }
@@ -114,19 +133,24 @@ class MovesList {
      */
     make_vnode_line(move) {
         if (!move || move == undefined) {
-            throw new Error('[make_vnode_line] Move is not valid')
+            throw new Error('[PGN::make_vnode_line] Move is not valid')
         }
-        const list = []
+        let list = []
 
         if (move.san) {
-            list.push(move.vnode)
+            console.log('[PGN::make_vnode_line] list.push because move.san')
+            list.push(move.make_vnode({ current_move: this.current_move() }))
+        }
+        if (move.next_move) {
+            console.log('[PGN::make_vnode_line] move.next_move', move.next_move)
+            list = list.concat(this.make_vnode_line(this.moves[ move.next_move ]))
         }
 
-        if (move.next_move) {
-            this.move_forward()
-            console.log('[make_vnode_line] move.next_move', move.next_move)
-            return list.concat(this.make_vnode_line(this.moves[ move.next_move ]))
+        if (move.ravs.length > 0) {
+            console.log('[PGN::make_vnode_line] RAVing')
+            move.ravs.map(rav => list.push(m('div.rav.tree-branch', [ m('span', '('), this.make_vnode_line(this.moves[ rav ]), m('span', ')') ])))
         }
+
         return list
     }
 }
@@ -140,6 +164,7 @@ class MovesList {
  * @property {String} san - human readable format
  * @property {Number} halfmove - starting from 1 according to standards
  * @property {Move.id[]} ravs - variations stemming from this position
+ * @property {Boolean} is_first_move_in_rav - Used to display ...
  */
 class Move {
     constructor(param) {
@@ -150,15 +175,32 @@ class Move {
         this.next_move = null
         this.ravs = []
         this.half_move = 0
+        this.is_first_move_in_rav = false
+        this.is_white_move = param.fen.split(' ')[ 1 ] == 'b' // because the fen is after the move was played
     }
 
-    get vnode() {
+    make_vnode(param) {
+        console.log('[Move::make_vnode] ', param.current_move + ' =+= ' + this.id)
+        let move_number = ''
+        if (this.is_white_move) {
+            move_number = `${Math.ceil(this.half_move / 2)}.`
+        } else if (this.is_first_move_in_rav) {
+            move_number = `${Math.ceil(this.half_move / 2)}...`
+        }
         return [
             m('span.move', {
+                onclick: () => {
+                    const Board = require('../ui/component/board/chessground')
+                    const Moves = require('../ui/component/pgn/moves')
+                    console.log('[Move.click] ', Board)
+                    Board.chessjs.load(this.fen)
+                    Board.sync()
+                    Moves.current_move(this.id)
+                },
                 'data-id': this.id,
                 'data-fen': this.fen,
-                class: `move ${this.half_move % 2 == 1 ? 'white_move' : 'black_move'} `
-            }, (this.half_move % 2 == 1 ? `${this.half_move}. ` : ' ') + this.san)
+                class: `move ${this.is_white_move ? 'white_move' : 'black_move'} ${param.current_move == this.id ? 'current_move' : ''}`
+            }, `${move_number} ${this.san}`)
         ]
     }
 }
@@ -167,52 +209,3 @@ module.exports = {
     MovesList,
     Move
 }
-
-
-/*
-const list = new MovesList()
-
-list.add_move(new Move({
-    fen: 'fen1',
-    san: 'a1'
-}))
-list.add_move(new Move({
-    fen: 'fen1',
-    san: 'b2'
-}))
-list.add_move(new Move({
-    fen: 'fen1',
-    san: 'c3'
-}))
-list.move_backward()
-list.add_move(new Move({
-    fen: 'fen1',
-    san: 'd4'
-}))
-
-list.print()
-*/
-// console.log('---> ', )
-
-
-/* const test = {
-    moves: []
-}
-
-const p = new Proxy(test, {
-    get: (target, name) => {
-        console.log('get-->', name)
-
-        if (property === 'length') {
-            return length
-        }
-        if (property in target) {
-            return target[ property ]
-        }
-        if (property in Array.prototype) {
-            return Array.prototype[ property ]
-        }
-    }
-})
-
-p.map(move => console.log('one move', move)) */

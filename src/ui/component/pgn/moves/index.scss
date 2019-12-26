@@ -1,22 +1,30 @@
+$text-color: #999;
+
 div.move_list {
     color: #999;
     clear: both;
 
-    .move {
-        cursor: pointer;
-    }
+
+    position: relative;
+    padding-left: 6px;
 
     span.move {
+        :last-child {
+            margin-right: 0;
+        }
+
         margin-right: 6px;
         text-align: center;
+        cursor: pointer;
+        white-space: nowrap;
     }
 
     .current_move {
-        border-bottom: 1px solid #999;
+        border-bottom: 1px solid $text-color;
     }
 
     .rav {
-        border-left: 1px solid #999;
-        padding-left: 6px;
+        margin: 5px 0 0 15px;
+        position: relative;
     }
 }
