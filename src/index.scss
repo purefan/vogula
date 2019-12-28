@@ -144,7 +144,7 @@ $toolbar-height: 5vh;
         display: none;
     }
 
-    &::after {
+    &:not(:last-child)::after {
         position: absolute;
         content: "";
         top: 8px;
