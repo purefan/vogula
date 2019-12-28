@@ -9,11 +9,10 @@ div.move_list {
     padding-left: 6px;
 
     span.move {
-        :last-child {
-            margin-right: 0;
+        &:not(:last-child) {
+            margin-right: 6px;
         }
 
-        margin-right: 6px;
         text-align: center;
         cursor: pointer;
         white-space: nowrap;
@@ -26,5 +25,9 @@ div.move_list {
     .rav {
         margin: 5px 0 0 15px;
         position: relative;
+
+        span:nth-last-child(2) {
+            margin-right: 0;
+        }
     }
 }
