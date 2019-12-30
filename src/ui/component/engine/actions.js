@@ -29,7 +29,8 @@ async function add_to_queue(param) {
         method: 'POST',
         url: localStorage.getItem('settings.engine.resker.host') + '/position',
         headers: {
-            'x-api-key': localStorage.getItem('settings.engine.resker.api_key')
+            'x-api-key': localStorage.getItem('settings.engine.resker.api_key'),
+            resker_client: localStorage.getItem('settings.engine.resker.client')
         },
         body: {
             fen: pgn_moves.move_list.current_fen,
@@ -56,7 +57,8 @@ async function fetch_analysis(fen) {
         url: localStorage.getItem('settings.engine.resker.host') + '/position',
         headers: {
             'x-api-key': localStorage.getItem('settings.engine.resker.api_key'),
-            fen
+            fen,
+            resker_client: localStorage.getItem('settings.engine.resker.client')
         }
     })
 
