@@ -33,6 +33,15 @@ const Settings = {
                 }))
             ]),
             m('div.tr', [
+                m('div.td', 'Resker Client Name:'),
+                m('div.td', m('input', {
+                    type: 'text', onchange: e => {
+                        localStorage.setItem('settings.engine.resker.client', e.target.value)
+                    },
+                    value: localStorage.getItem('settings.engine.resker.client')
+                }))
+            ]),
+            m('div.tr', [
                 m('div.td', 'Resker Enabled:'),
                 m('div', { class: 'td onoff' }, [
                     m('input.onoff', {
@@ -64,7 +73,8 @@ async function test_resker() {
     try {
         Settings.resker_test_result = await m.request({
             url: localStorage.getItem('settings.engine.resker.host') + '/version',
-            method: 'GET'
+            method: 'GET',
+            resker_client: localStorage.getItem('settings.engine.resker.client')
         })
 
     } catch (error) {
