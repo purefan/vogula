@@ -1,5 +1,7 @@
 const m = require('mithril')
 const stream = require('mithril/stream')
+const chessjs = require('chess.js')
+const headers = require('../ui/component/pgn/headers')
 
 class MovesList {
     constructor() {
@@ -51,7 +53,6 @@ class MovesList {
                 this.moves[ this.moves[ this.current_move() ].previous_move ].next_move = move.id
             }
         }
-        this.update_vnodes()
     }
 
     count_half_moves_before() {
@@ -75,6 +76,19 @@ class MovesList {
         return this.moves[ this.current_move() ]
     }
 
+    get moves_count() {
+        let current_move = this.moves[ this.current_move() ]
+        let count = 0
+        while (current_move.previous_move) {
+            current_move = this.moves[ current_move.previous_move ]
+        }
+        while (current_move.next_move) {
+            count++
+            current_move = this.moves[ current_move.next_move ]
+        }
+        return count
+    }
+
     move_forward() {
         if (this.moves[ this.current_move() ].next_move) {
             this.current_move(this.moves[ this.current_move() ].next_move)
@@ -91,9 +105,73 @@ class MovesList {
         return false
     }
 
+    /**
+     * Looks backwards from this.current_move() until we find the move that
+     * starts this variation or is the first move
+     */
+    find_start_of_rav() {
+        let previous_current_move = this.moves[ this.current_move() ]
+        while (previous_current_move.previous_move && !previous_current_move.is_first_move_in_rav) {
+            previous_current_move = this.moves[ this.moves[ previous_current_move.id ].previous_move ]
+        }
+        return previous_current_move
+    }
+
     import_pgn(full_pgn) {
-        const pgn_moves = this.separate_pgn_parts(full_pgn)
-        console.log('-->', pgn_moves)
+        const game_parts = this.separate_pgn_parts(full_pgn)
+        game_parts.clean_moves = game_parts.moves
+            .replace(/[\d]+\.\s/g, '') // remove the numbers from the SAN: (1.)d4
+            .replace(/\(/, ' ( ') // add a space so we can easily tell when a variation starts
+            .replace(/\)/, ' ) ') // and ends in the for loop
+            .split(' ')
+            .filter(san => san.length > 0)
+        const chess = new chessjs()
+        this.first_move
+        let next_move = null
+        let san_to_import = null
+
+        if (this.moves_count < 1) {
+            headers.data(game_parts.headers)
+        }
+
+        for (move in game_parts.clean_moves) {
+            next_move = this.moves[ this.current_move() ].next_move
+            san_to_import = game_parts.clean_moves[ move ].replace(/\s/g, '')
+            if (san_to_import.includes('(')) {
+                this.move_backward()
+                chess.load(this.moves[ this.current_move() ].fen)
+                continue
+            }
+
+            if (san_to_import.includes(')')) {
+                const start = this.find_start_of_rav()
+                const next_move_from_start = this.moves[ start.previous_move ].next_move
+                this.current_move(next_move_from_start)
+                chess.load(this.moves[ this.current_move() ].fen)
+                continue
+            }
+            const chess_move = chess.move(san_to_import)
+            if (!chess_move) {
+                console.error(`Importing an invalid move: "${san_to_import}"`)
+                this.moves[ this.current_move() ].comment_after_move = san_to_import
+                continue
+            }
+
+            if (
+                // is the next move equal to the move we are trying to import and not equal to the current move
+                (next_move && !(this.moves[ next_move ].san == chess_move.san && this.moves[ next_move ].fen == chess.fen()))
+                // Or is it a whole new move
+                || !next_move
+            ) {
+                const new_move = new Move({
+                    san: chess_move.san,
+                    fen: chess.fen()
+                })
+                this.add_move(new_move)
+            }
+        }
+
+        this.update_vnodes()
     }
 
     separate_pgn_parts(full_pgn) {
@@ -173,8 +251,10 @@ class MovesList {
  * @property {String} fen - How the board looks after making this move
  * @property {String} san - human readable format
  * @property {Number} halfmove - starting from 1 according to standards
- * @property {Move.id[]} ravs - variations stemming from this position
+ * @property {String[]} ravs - variations stemming from this position
  * @property {Boolean} is_first_move_in_rav - Used to display ...
+ * @property {String} previous_move - id for the previous move
+ * @property {String} comment_after_move - Text commentary
  */
 class Move {
     constructor(param) {
@@ -187,6 +267,7 @@ class Move {
         this.half_move = 0
         this.is_first_move_in_rav = false
         this.is_white_move = param.fen.split(' ')[ 1 ] == 'b' // because the fen is after the move was played
+        this.comment_after_move = ''
     }
 
     make_vnode(param) {
@@ -210,7 +291,7 @@ class Move {
                 'data-id': this.id,
                 'data-fen': this.fen,
                 class: `move ${this.is_white_move ? 'white_move' : 'black_move'} ${param.current_move == this.id ? 'current_move' : ''}`
-            }, `${move_number} ${this.san}`)
+            }, `${move_number} ${this.san}${this.comment_after_move ? ' {' + this.comment_after_move + '}' : ''}`)
         ]
     }
 }

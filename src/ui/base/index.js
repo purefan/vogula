@@ -12,8 +12,8 @@ const Base = {
         m('div.board-container-toolbar', m(board.toolbar))
       ]),
       m('div.pgn-container', [
-        m('div.pgn-container-toolbar', 'pgn-toolbar'),
-        m('div.pgn-container-headers', 'pgn-headers'),
+        m('div.pgn-container-toolbar.toolbar-container', m(pgn.toolbar)),
+        m('div.pgn-container-headers', m(pgn.headers)),
         m('div.pgn-container-moves', m(pgn.moves))
       ]),
       m('div.engine-container', [

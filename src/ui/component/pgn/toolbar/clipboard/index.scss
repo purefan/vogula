@@ -2,4 +2,6 @@
 
 div.pgn_toolbar_clipboard textarea {
     width: calc(#{$modal-content-width} / 2);
+    height: 30vh;
+    background: #fff;
 }

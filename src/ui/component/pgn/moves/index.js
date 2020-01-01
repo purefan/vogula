@@ -42,18 +42,13 @@ pgn_moves.make_move = param => {
     })
 
     pgn_moves.move_list.add_move(move)
-
+    pgn_moves.move_list.update_vnodes()
     m.redraw()
     engine.fetch_analysis(move.fen) // just trigger it, side-effects yeah I know...
 }
 
 function import_pgn(pgn) {
-    const move_list = new PGN.MovesList()
-    move_list.import_pgn(pgn)
-    for (move in moves) {
-        move_list.add_move(moves[ move ])
-    }
-    console.log('--> print')
-    move_list.print()
+    pgn_moves.move_list.import_pgn(pgn)
+
 }
 module.exports = pgn_moves
