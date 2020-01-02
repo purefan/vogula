@@ -133,6 +133,7 @@ Board.sync = () => {
         {
             fen: Board.chessjs.fen(),
             turnColor: letter_to_color[ Board.chessjs.turn() ],
+            orientation: localStorage.getItem('board.orientation') || 'white',
             dests: Board.make_dests(Board.chessjs),
             movable: Object.assign(
                 {},
