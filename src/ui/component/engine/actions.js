@@ -71,7 +71,7 @@ async function fetch_analysis(fen) {
         ))
         console.log('[Engine::fetch_analysis] auto-queuing')
         await add_to_queue({
-            depth_goal: 30,
+            depth_goal: parseInt(localStorage.getItem('settings.engine.resker.auto_depth_goal')) || 30,
             priority: 1
         })
         fetch_analysis(fen)
