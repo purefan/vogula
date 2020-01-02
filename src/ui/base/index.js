@@ -9,7 +9,7 @@ const Base = {
       m(promote),
       m('div.board-container', [
         m('div.board-container-chessground', m(board.chessground)),
-        m('div.board-container-toolbar', m(board.toolbar))
+        m('div.board-container-toolbar.toolbar-container', m(board.toolbar))
       ]),
       m('div.pgn-container', [
         m('div.pgn-container-toolbar.toolbar-container', m(pgn.toolbar)),
@@ -17,17 +17,16 @@ const Base = {
         m('div.pgn-container-moves', m(pgn.moves))
       ]),
       m('div.engine-container', [
-        m('div.engine-container-toolbar', m(engine.toolbar)),
+        m('div.engine-container-toolbar.toolbar-container', m(engine.toolbar)),
         m('div.engine-container-analysis', m(engine.analysis)),
         m('div.engine-container-status', m(engine.status))
       ]),
       m('div.db-container', [
-        m('div.db-container-toolbar', 'db-toolbar'),
+        m('div.db-container-toolbar.toolbar-container', 'db-toolbar'),
         m('div.db-container-data', 'db-data'),
         m('div.db-container-status', 'db-status')
       ])
     ])
-  ])
 }
 
 module.exports = Base
