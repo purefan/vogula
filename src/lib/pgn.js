@@ -134,15 +134,18 @@ class MovesList {
             headers.data(game_parts.headers)
         }
 
-        for (move in game_parts.clean_moves) {
+        for (move in game_parts.moves) {
             next_move = this.moves[ this.current_move() ].next_move
-            san_to_import = game_parts.clean_moves[ move ].replace(/\s/g, '')
+            san_to_import = game_parts.moves[ move ]
+
+            // Entering RAV
             if (san_to_import.includes('(')) {
                 this.move_backward()
                 chess.load(this.moves[ this.current_move() ].fen)
                 continue
             }
 
+            // Exiting RAV
             if (san_to_import.includes(')')) {
                 const start = this.find_start_of_rav()
                 const next_move_from_start = this.moves[ start.previous_move ].next_move
@@ -188,7 +191,15 @@ class MovesList {
         }
         return {
             headers,
-            moves: match[ 2 ].replace(/\r?\n|\r/g, '').replace(/\s\s+/g, ' ')
+            moves: match[ 2 ]
+                .replace(/\r?\n|\r/g, ' ')
+                .replace(/\s\s+/g, ' ')
+                .replace(/[\d]+[\.]{1,3}/g, '') // remove the numbers from the SAN: (1.)d4
+                .replace(/\(/, ' ( ') // add a space so we can easily tell when a variation starts
+                .replace(/\)/, ' ) ') // and ends in the for loop
+                .split(' ')
+                .map(san => san.replace(/\s/g, ''))
+                .filter(san => san.length > 0)
         }
     }
 
