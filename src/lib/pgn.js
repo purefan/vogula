@@ -281,14 +281,18 @@ class Move {
         this.previous_move = null
         this.next_move = null
         this.ravs = []
-        this.half_move = 0
+        this.half_move = param.half_move || 0
         this.is_first_move_in_rav = false
         this.is_white_move = param.fen.split(' ')[ 1 ] == 'b' // because the fen is after the move was played
         this.comment_after_move = ''
     }
 
+    /**
+     *
+     * @param {Object} param
+     * @param {String} param.current_move - id of the current move
+     */
     make_vnode(param) {
-        console.log('[Move::make_vnode] ', param.current_move + ' =+= ' + this.id)
         let move_number = ''
         if (this.is_white_move) {
             move_number = `${Math.ceil(this.half_move / 2)}.`
@@ -307,7 +311,7 @@ class Move {
                 },
                 'data-id': this.id,
                 'data-fen': this.fen,
-                class: `move ${this.is_white_move ? 'white_move' : 'black_move'} ${param.current_move == this.id ? 'current_move' : ''}`
+                class: `move ${this.is_white_move ? 'white_move' : 'black_move'} ${param && param.current_move == this.id ? 'current_move' : ''}`
             }, `${move_number} ${this.san}${this.comment_after_move ? ' {' + this.comment_after_move + '}' : ''}`)
         ]
     }
