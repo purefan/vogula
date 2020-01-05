@@ -1,8 +1,8 @@
 const m = require('mithril')
 const stream = require('mithril/stream')
-const pgn = require('../../pgn/moves')
-const toolbar = require('../toolbar')
 const EngineActions = require('../actions')
+const moves = require('../../pgn/moves')
+
 require('./index.scss')
 /**
  * Queries resker for analysis and allows to queue a position.
@@ -11,7 +11,9 @@ require('./index.scss')
 
 const Engine = {
     oninit: () => {
-
+        stream.lift(move_id => {
+            EngineActions.fetch_analysis(moves.move_list.moves[ move_id ].fen)
+        }, moves.move_list.current_move)
     }
     , status: 'idle'
     , analysis: {}
