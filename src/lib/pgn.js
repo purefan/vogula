@@ -33,7 +33,13 @@ class MovesList {
             throw new Error('2. Duplicating previous move', this.moves)
         }
         if (this.current_move() && this.moves[ this.current_move() ].next_move == move.id) {
-            throw new Error('3. Duplicating next move', this.moves)
+            this.current_move(move.id)
+        }
+
+        // is the new move equal to the next move?
+        if (this.current_move() && this.moves[ this.current_move() ].next_move && this.moves[ this.moves[ this.current_move() ].next_move ].san == move.san) {
+            this.current_move(this.moves[ this.moves[ this.current_move() ].next_move ].id)
+            return
         }
 
         move.previous_move = this.current_move()
