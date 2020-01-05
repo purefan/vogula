@@ -23,7 +23,9 @@ module.exports = {
                 viewport: 'width=device-width, initial-scale=1'
             }
         })
-        , new CspHtmlWebpackPlugin()
+        , new CspHtmlWebpackPlugin({
+            'script-src': [ "'unsafe-inline'", "'self'" ]
+        })
     ],
     module: {
         rules: [
