@@ -19,8 +19,8 @@
     "shelljs": "^0.8.3"
   },
   "devDependencies": {
-    "@babel/core": "^7.7.5",
-    "@babel/preset-env": "^7.7.6",
+    "@babel/core": "^7.7.7",
+    "@babel/preset-env": "^7.7.7",
     "babel-core": "^6.26.3",
     "babel-loader": "^8.0.6",
     "babel-polyfill": "^6.26.0",
@@ -29,20 +29,19 @@
     "babel-preset-stage-0": "^6.24.1",
     "config": "^3.2.4",
     "csp-html-webpack-plugin": "^3.0.4",
-    "css-loader": "^3.3.0",
+    "css-loader": "^3.4.1",
     "electron-reloader": "^0.3.0",
     "esm": "^3.2.25",
     "file-loader": "^5.0.2",
     "html-webpack-plugin": "^3.2.0",
     "messageformat": "^2.3.0",
     "messageformat-loader": "^0.8.1",
-    "mini-css-extract-plugin": "^0.8.0",
+    "mini-css-extract-plugin": "^0.8.2",
     "mithril": "^2.0.4",
     "mithril-datepicker": "^0.9.3",
     "node-sass": "^4.13.0",
     "sass-loader": "^7.3.1",
-    "style-loader": "^1.0.1",
-    "webpack": "^4.41.2"
+    "webpack": "^4.41.5"
   },
   "build": {
     "appId": "com.purefan.vogula",
