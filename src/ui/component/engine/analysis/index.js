@@ -4,6 +4,7 @@ const EngineActions = require('../actions')
 const moves = require('../../pgn/moves')
 const chess = require('chess.js')
 const pgn = require('../../../../lib/pgn')
+const clipboard = require('../../pgn/toolbar/clipboard')
 
 require('./index.scss')
 /**
@@ -14,7 +15,9 @@ require('./index.scss')
 const Engine = {
     oninit: () => {
         stream.lift(move_id => {
-            EngineActions.fetch_analysis(moves.move_list.moves[ move_id ].fen)
+            if (clipboard.state == 'hidden') {
+                EngineActions.fetch_analysis(moves.move_list.moves[ move_id ].fen)
+            }
         }, moves.move_list.current_move)
     }
     , status: 'idle'
