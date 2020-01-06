@@ -1,4 +1,5 @@
 $text-color: #999;
+$pgn-container-width: 25vw;
 
 body {
     background: #222;
@@ -14,7 +15,7 @@ $toolbar-height: 5vh;
 .grid-container {
     display: grid;
     height: 100vh;
-    grid-template-columns: 50vw 25vw 24vw;
+    grid-template-columns: 50vw $pgn-container-width 24vw;
     grid-template-rows: 1fr 1fr;
     grid-template-areas: "board-container pgn-container engine-container""board-container pgn-container db-container";
 }
@@ -54,6 +55,8 @@ $toolbar-height: 5vh;
 
 .pgn-container-moves {
     grid-area: pgn-container-moves;
+    width: $pgn-container-width;
+    overflow-wrap: break-word;
 }
 
 .engine-container {
