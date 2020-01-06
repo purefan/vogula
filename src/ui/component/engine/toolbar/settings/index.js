@@ -23,10 +23,16 @@ const Settings = {
                 }))
             ]),
             m('div.tr', [
+                m('div.td', 'Resker Automatic MultiPV Goal:'),
+                m('div.td', m('input', {
+                    type: 'text', onkeyup: e => localStorage.setItem('settings.engine.resker.auto_multipv_goal', e.target.value),
+                    value: localStorage.getItem('settings.engine.resker.auto_multipv_goal')
+                }))
+            ]),
+            m('div.tr', [
                 m('div.td', 'Resker Api Key:'),
                 m('div.td', m('input', {
                     type: 'text', onchange: e => {
-                        console.log('Saving api key', e.target.value)
                         localStorage.setItem('settings.engine.resker.api_key', e.target.value)
                     },
                     value: localStorage.getItem('settings.engine.resker.api_key')
