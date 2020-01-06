@@ -41,8 +41,8 @@ window.engine = Engine
 function format_analysis(result) {
     const current_fen = moves.move_list.moves[ moves.move_list.current_move() ].fen
     const validator = new chess()
-    return result.steps
-        .filter(step => step.depth == result.depth)
+    const vnodes = result.steps
+        .filter(step => step.depth == EngineActions.analysis().depth_goal)
         .reduce((acc, curr) => {
             if (!acc.find(looking => looking.pv == curr.pv)) {
                 acc.push(curr)
@@ -52,7 +52,10 @@ function format_analysis(result) {
         .map(step => {
             validator.load(current_fen)
             let current_half_move = moves.move_list.count_half_moves_before()
-            return m('div.tr', [
+            return m('div.tr', {
+                depth: step.depth,
+                score: step.score.value
+            }, [
                 m('div.td', step.score.value),
                 m('div.td', step.depth),
                 m('div.td', m('div.move_list', step.pv
@@ -73,6 +76,8 @@ function format_analysis(result) {
                 ))
             ])
         })
+    vnodes.sort((a, b) => Math.abs(b.attrs.score) - Math.abs(a.attrs.score))
+    return vnodes
 }
 
 
