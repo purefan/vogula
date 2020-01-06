@@ -123,14 +123,27 @@ class MovesList {
         return previous_current_move
     }
 
+    /**
+     *
+     * @param {*} full_pgn
+     *
+     [Event ""]
+[Site ""]
+[Date "????.??.??"]
+[Round ""]
+[White ""]
+[Black ""]
+[Result "*"]
+
+1.e4 c5 2.Nf3 e6 3.d4 cxd4 4.Nxd4 a6 5.Bd3 Nf6 6.O-O Qc7 7.c4 d6 8.Qe2 g6
+9.Nc3 Bg7 10.Nf3 Nc6 11.Rd1 O-O 12.Be3 b6 13.Rac1 Nd7 14.h3 Nc5 15.Bb1 Bb7
+16.Qd2 Rad8 17.b3 Qb8
+    ( 17...Ba8 18.Nh2 )
+*
+
+     */
     import_pgn(full_pgn) {
         const game_parts = this.separate_pgn_parts(full_pgn)
-        game_parts.clean_moves = game_parts.moves
-            .replace(/[\d]+\.\s/g, '') // remove the numbers from the SAN: (1.)d4
-            .replace(/\(/, ' ( ') // add a space so we can easily tell when a variation starts
-            .replace(/\)/, ' ) ') // and ends in the for loop
-            .split(' ')
-            .filter(san => san.length > 0)
         const chess = new chessjs()
         this.first_move
         let next_move = null
@@ -159,10 +172,11 @@ class MovesList {
                 chess.load(this.moves[ this.current_move() ].fen)
                 continue
             }
+
             const chess_move = chess.move(san_to_import)
             if (!chess_move) {
                 console.error(`Importing an invalid move: "${san_to_import}"`)
-                this.moves[ this.current_move() ].comment_after_move = san_to_import
+                this.moves[ this.current_move() ].comment_after_move += ` ${san_to_import} `
                 continue
             }
 
@@ -200,9 +214,11 @@ class MovesList {
             moves: match[ 2 ]
                 .replace(/\r?\n|\r/g, ' ')
                 .replace(/\s\s+/g, ' ')
-                .replace(/[\d]+[\.]{1,3}/g, '') // remove the numbers from the SAN: (1.)d4
+                .replace(/[\d]+[\.]{1,3}\s(\w)/g, '$1') // Remove space after move number 4. d3 --> 4.d3
                 .replace(/\(/, ' ( ') // add a space so we can easily tell when a variation starts
                 .replace(/\)/, ' ) ') // and ends in the for loop
+                .replace(/\{/, '') // Same technique for comments
+                .replace(/\}/, '') //
                 .split(' ')
                 .map(san => san.replace(/\s/g, ''))
                 .filter(san => san.length > 0)
@@ -217,9 +233,7 @@ class MovesList {
         }
 
         let new_vnodes = this.make_vnode_line(current_move)
-        console.log('[PGN::update_vnodes] Updating vnodes', new_vnodes)
         this.vnodes(new_vnodes)
-
     }
 
     /**
@@ -231,7 +245,6 @@ class MovesList {
         if (!move || move == undefined) {
             throw new Error('[PGN::make_vnode_line] Move is not valid')
         }
-        console.log('----> make_vnode_line last', move, last_move)
         let list = []
 
         // Append this move: e.g: 1.d4
@@ -312,7 +325,7 @@ class Move {
                 'data-id': this.id,
                 'data-fen': this.fen,
                 class: `move ${this.is_white_move ? 'white_move' : 'black_move'} ${param && param.current_move == this.id ? 'current_move' : ''}`
-            }, `${move_number} ${this.san}${this.comment_after_move ? ' {' + this.comment_after_move + '}' : ''}`)
+            }, `${move_number} ${this.san} ${this.comment_after_move ? '{' + this.comment_after_move + '}' : ''}`)
         ]
     }
 }

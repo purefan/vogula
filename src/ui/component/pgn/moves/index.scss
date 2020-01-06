@@ -9,10 +9,6 @@ div.move_list {
     padding-left: 6px;
 
     span.move {
-        &:not(:last-child) {
-            margin-right: 6px;
-        }
-
         text-align: center;
         cursor: pointer;
         white-space: nowrap;
