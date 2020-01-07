@@ -12,7 +12,8 @@ const EngineActions = {
     status: stream('idle'),
     analysis: stream({}),
     add_to_queue,
-    fetch_analysis
+    fetch_analysis,
+    xhr: null
 }
 
 /**
@@ -51,9 +52,14 @@ async function fetch_analysis(fen) {
     console.log('[Engine::fetch_analysis] fetching analysis for ', fen)
     assert_valid_key()
     EngineActions.status('fetching')
+    if (EngineActions.xhr !== null) {
+        EngineActions.xhr.abort()
+        EngineActions.xhr = null
+    }
     // @todo implement caching
     const res = await m.request({
         method: 'GET',
+        config: xhr => EngineActions.xhr = xhr,
         url: localStorage.getItem('settings.engine.resker.host') + '/position',
         headers: {
             'x-api-key': localStorage.getItem('settings.engine.resker.api_key'),
