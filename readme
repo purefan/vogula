@@ -1,11 +1,7 @@
-It must provide the minimal interface to load anything, the bare skeleton. Everything else will be plugins, so part of the basic core functionality is the
-plugin system.
+Chess interface to interact with [Resker](https://github.com/purefan/resker)
 
-The plugin system will store actions (functions), similar to express middleware. Each action will receive an object (`params`) and must return something.
-The returned object of an action will be passed along to the next action in the chain.
+1. `npm install`
+2. `npm run build' (webpack monitors changes in code)
+3. `electron .` (in another terminal probably)
 
-Core Events:
-- init: Triggered when the app is ready to start processing plugins. This is a good place to register the log-in screen
-
-A plugin can trigger events. These events may trigger other plugins
-Vogula uses MithrilJS, so you have to learn that if you want to make visual plugins (a popup for example).
+Electron will reload with every webpack build
