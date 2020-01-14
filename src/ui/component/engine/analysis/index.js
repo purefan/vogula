@@ -39,7 +39,8 @@ window.engine = Engine
  * @param {Object} result
  */
 function format_analysis(result) {
-    const current_fen = moves.move_list.moves[ moves.move_list.current_move() ].fen
+    const current_move = moves.move_list.moves[ moves.move_list.current_move() ]
+
     const validator = new chess()
     const vnodes = result.steps
         .filter(step => step.depth == EngineActions.analysis().depth_goal)
@@ -50,13 +51,26 @@ function format_analysis(result) {
             return acc
         }, [])
         .map(step => {
-            validator.load(current_fen)
+            validator.load(current_move.fen)
             let current_half_move = moves.move_list.count_half_moves_before()
+            console.log('is white move', current_move)
+            let eval_symbol = '+'
+            // is_white_move refers to the actual current_move, but when displaying
+            // we need "is white's turn to play", that is why it is "inverted" in this
+            // condition
+            if (
+                (!current_move.is_white_move && step.score.value < 0) ||
+                (current_move.is_white_move && step.score.value > 0)) {
+                eval_symbol = '-'
+            }
+            if (step.score.value == 0.0) {
+                eval_symbol = ''
+            }
             return m('div.tr', {
                 depth: step.depth,
                 score: step.score.value
             }, [
-                m('div.td', step.score.value),
+                m('div.td', `${eval_symbol}${(Math.abs(step.score.value) / 100).toFixed(2)}`),
                 m('div.td', step.depth),
                 m('div.td', m('div.move_list', step.pv
                     .split(' ')
@@ -76,7 +90,10 @@ function format_analysis(result) {
                 ))
             ])
         })
-    vnodes.sort((a, b) => Math.abs(b.attrs.score) - Math.abs(a.attrs.score))
+    vnodes.sort((a, b) => {
+        if (!current_move.is_white_move) return Math.abs(b.attrs.score) - Math.abs(a.attrs.score)
+        return Math.abs(a.attrs.score) - Math.abs(b.attrs.score)
+    })
     return vnodes
 }
 

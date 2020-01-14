@@ -3,6 +3,7 @@
  */
 const m = require('mithril')
 const stream = require('mithril/stream')
+const cache = require('../../../lib/cache')
 
 /**
  * @property {mithril/stream} status -
@@ -15,7 +16,7 @@ const EngineActions = {
     fetch_analysis,
     xhr: null
 }
-
+window.actions = EngineActions
 /**
 * When pressed adds the current position to the resker queue
 * @param {Number} [depth_goal=40]
@@ -48,14 +49,18 @@ async function add_to_queue(param) {
  * @param {String} fen
  */
 async function fetch_analysis(fen) {
-    const pgn_moves = require('../pgn/moves')
     console.log('[Engine::fetch_analysis] fetching analysis for ', fen)
+    /* if (EngineActions.cache[ fen ]) {
+        console.log('Engine::fetch_analysis] fen found in cache with value', EngineActions.cache[ fen ])
+    } */
     assert_valid_key()
     EngineActions.status('fetching')
+
     if (EngineActions.xhr !== null) {
         EngineActions.xhr.abort()
         EngineActions.xhr = null
     }
+
     // @todo implement caching
     const res = await m.request({
         method: 'GET',
@@ -84,6 +89,10 @@ async function fetch_analysis(fen) {
         fetch_analysis(fen)
     } else {
         console.log('[Engine::fetch_analysis] Fetched analysis and streaming it:', res)
+        /* EngineActions.cache[ fen ] = new fig({
+            ttl: '15m',
+            value: res
+        }) */
         EngineActions.analysis(res)
         EngineActions.status(res.status)
     }

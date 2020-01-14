@@ -60,7 +60,7 @@ Board.config = {
                 if (move.flags == 'e') {
                     Board.sync()
                 }
-                console.log('chessjs move', move)
+                console.log('[chessground] chessjs move', move)
 
                 Board.chessground.set({
                     turnColor: Board.chessjs.turn() == 'b' ? 'black' : 'white',

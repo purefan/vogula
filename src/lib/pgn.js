@@ -219,6 +219,7 @@ class MovesList {
                 .replace(/\)/, ' ) ') // and ends in the for loop
                 .replace(/\{/, '') // Same technique for comments
                 .replace(/\}/, '') //
+                .replace(/[\d]+\./g, '') // remove numbers
                 .split(' ')
                 .map(san => san.replace(/\s/g, ''))
                 .filter(san => san.length > 0)
