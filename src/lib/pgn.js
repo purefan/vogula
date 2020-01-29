@@ -5,6 +5,13 @@ const headers = require('../ui/component/pgn/headers')
 
 class MovesList {
     constructor() {
+        this.reset()
+    }
+
+    /**
+     * Useful when starting a new game
+     */
+    reset() {
         this.moves = {}
         this.vnodes = stream(m('div', '<no moves>'))
         this.half_move = -1

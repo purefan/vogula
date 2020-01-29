@@ -6,15 +6,8 @@ const pgn_headers = {
     valid_tags: [
         'Event', 'Site', 'Date', 'Round', 'White', 'Black', 'Result' // 7 Tag Roster http://www.saremba.de/chessgml/standards/pgn/pgn-complete.htm
     ],
-    data: stream({
-        Event: 'Event',
-        Site: 'Site',
-        White: 'White, Player',
-        Result: '1/2-1/2',
-        Black: 'Black, Player',
-        Round: 2,
-        Date: '2010.10.01'
-    }),
+    make_default_headers,
+    data: stream(make_default_headers()),
     view: () => [
         m('div.header-group', { 'data-group_name': 'event' }, [
             pgn_headers.data().Event ? m('span.header.event', pgn_headers.data().Event) : null,
@@ -28,6 +21,18 @@ const pgn_headers = {
             pgn_headers.data().Round ? m('span.header.round', pgn_headers.data().Round) : null,
             pgn_headers.data().Date ? m('span.header.date', pgn_headers.data().Date) : null ])
     ]
+}
+
+function make_default_headers() {
+    return {
+        Event: 'Event',
+        Site: 'Site',
+        White: 'White, Player',
+        Result: '1/2-1/2',
+        Black: 'Black, Player',
+        Round: 1,
+        Date: '2010.10.01'
+    }
 }
 
 module.exports = pgn_headers
