@@ -325,8 +325,14 @@ class Move {
                 onclick: () => {
                     const Board = require('../ui/component/board/chessground')
                     const Moves = require('../ui/component/pgn/moves')
-                    console.log('[Move.click] ', Board)
-                    Board.chessjs.load(this.fen)
+                    // We need to find this moves squares to update the highlighted squares
+                    if (Moves.move_list.moves[ this.previous_move ]) {
+                        Board.chessjs.load(Moves.move_list.moves[ this.previous_move ].fen)
+                        Board.chessjs.move(this.san)
+                    } else {
+                        Board.chessjs.load(this.fen)
+                    }
+
                     Board.sync()
                     Moves.current_move(this.id)
                 },

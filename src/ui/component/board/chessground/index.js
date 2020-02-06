@@ -127,6 +127,12 @@ const letter_to_color = {
  * Syncs chessjs into chessground
  */
 Board.sync = () => {
+    const lastMove = []
+    if (Board.chessjs.history({ verbose: true }).length > 0) {
+        const move = Board.chessjs.history({ verbose: true }).pop()
+        lastMove.push(move.from)
+        lastMove.push(move.to)
+    }
     const fixed_config = Object.assign(
         {},
         Board.config,
@@ -135,6 +141,7 @@ Board.sync = () => {
             turnColor: letter_to_color[ Board.chessjs.turn() ],
             orientation: localStorage.getItem('board.orientation') || 'white',
             dests: Board.make_dests(Board.chessjs),
+            lastMove,
             movable: Object.assign(
                 {},
                 Board.config.movable,
