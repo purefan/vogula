@@ -118,8 +118,9 @@ function format_analysis(result) {
             ])
         })
     vnodes.sort((a, b) => {
-        if (!current_move.is_white_move) return Math.abs(b.attrs.score) - Math.abs(a.attrs.score)
-        return Math.abs(a.attrs.score) - Math.abs(b.attrs.score)
+        console.log('Sorting', current_move.is_white_move, b.attrs.score, a.attrs.score)
+        if (!current_move.is_white_move) return b.attrs.score - a.attrs.score
+        return b.attrs.score - a.attrs.score
     })
     Engine.cache = {
         fen: result._id,
