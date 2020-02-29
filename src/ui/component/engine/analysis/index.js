@@ -10,17 +10,21 @@ require('./index.scss')
 /**
  * Queries resker for analysis and allows to queue a position.
  * Updates analysis when a new move is displayed if it exists in resker
+ * Updates the analysis display every time moves.move_list.current_move changes
+ * by triggering EngineActions.fetch_analysis
  */
 
 const Engine = {
     oninit: () => {
         stream.lift(move_id => {
             if (clipboard.state == 'hidden') {
+                console.log('[Engine] triggering fetch_analysis because current_move changed')
                 EngineActions.fetch_analysis(moves.move_list.moves[ move_id ].fen)
             }
         }, moves.move_list.current_move)
     }
     , status: 'idle'
+    , cache: {} // Simple caching
     , analysis: {}
     , view: () => m('div.engine_analysis', m('div.table', [
         m('div.tr', [
@@ -28,7 +32,7 @@ const Engine = {
             m('div.td', 'Depth'),
             m('div.td', 'Line'),
         ]),
-        (EngineActions.analysis().analysis || []).map(format_analysis)
+        stream.lift(format_analysis, EngineActions.analysis)()
     ]))
 }
 
@@ -39,10 +43,34 @@ window.engine = Engine
  * @param {Object} result
  */
 function format_analysis(result) {
+    if (Engine.cache.fen == result._id) {
+        console.log('[Analysis:format_analysis] Not processing the same position twice', result._id)
+        return Engine.cache.vnodes
+    }
+
+    console.log('[Analysis:format_analysis]', result)
+
+    if (!result.analysis || result.analysis.length < 1) {
+        console.log('[Analysis:format_analysis] No analysis')
+        Engine.cache = {
+            fen: result._id,
+            vnodes: false
+        }
+        return false
+    }
+
+    // Find the deepest analysis, this causes a single engine to count
+    const analysis = result.analysis.reduce((acc, curr) => {
+        if (curr.depth > acc.depth) {
+            return curr
+        }
+        return acc
+    }, { depth: 0 })
+
     const current_move = moves.move_list.moves[ moves.move_list.current_move() ]
 
     const validator = new chess()
-    const vnodes = result.steps
+    const vnodes = analysis.steps
         .filter(step => step.depth == EngineActions.analysis().depth_goal)
         .reduce((acc, curr) => {
             if (!acc.find(looking => looking.pv == curr.pv)) {
@@ -53,7 +81,6 @@ function format_analysis(result) {
         .map(step => {
             validator.load(current_move.fen)
             let current_half_move = moves.move_list.count_half_moves_before()
-            console.log('is white move', current_move)
             let eval_symbol = '+'
             // is_white_move refers to the actual current_move, but when displaying
             // we need "is white's turn to play", that is why it is "inverted" in this
@@ -94,6 +121,11 @@ function format_analysis(result) {
         if (!current_move.is_white_move) return Math.abs(b.attrs.score) - Math.abs(a.attrs.score)
         return Math.abs(a.attrs.score) - Math.abs(b.attrs.score)
     })
+    Engine.cache = {
+        fen: result._id,
+        vnodes
+    }
+    Engine.status = 'idle'
     return vnodes
 }
 
