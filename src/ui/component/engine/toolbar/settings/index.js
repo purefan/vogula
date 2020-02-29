@@ -61,6 +61,25 @@ const Settings = {
                 ])
             ]),
             m('div.tr', [
+                m('div.td', 'Cache'),
+                m('div', { class: 'td onoff' }, [
+                    m('input.onoff', {
+                        type: 'checkbox',
+                        id: 'cache_onoff',
+                        value: localStorage.getItem('settings.engine.resker.cache.enabled') === 'true',
+                        checked: localStorage.getItem('settings.engine.resker.cache.enabled') === 'true',
+                        onchange: e => {
+                            if (localStorage.getItem('settings.engine.resker.cache.enabled') === 'true') {
+                                localStorage.setItem('settings.engine.resker.cache.enabled', 'false')
+                            } else {
+                                localStorage.setItem('settings.engine.resker.cache.enabled', 'true')
+                            }
+                        }
+                    }),
+                    m('label.onoff', { for: 'cache_onoff' })
+                ])
+            ]),
+            m('div.tr', [
                 m('div.td', m('button', { onclick: test_resker }, 'Test Resker')),
                 m('div.td', Settings.resker_test_result)
             ])
