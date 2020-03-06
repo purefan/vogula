@@ -1,5 +1,6 @@
 const m = require('mithril')
 const moves = require('../../moves')
+const Board = require('../../../board/chessground')
 require('./index.scss')
 
 const Clipboard = {
@@ -14,7 +15,7 @@ const Clipboard = {
         }),
         m('div.actions', [
             m('button', { onclick: () => import_pgn() }, 'Copy from text box to the board'),
-            m('button', 'Copy position to clipboard'),
+            m('button', { onclick: fen_to_clipboard }, 'Copy position to clipboard'),
             m('button', 'Copy game to clipboard')
         ])
     ]))
@@ -25,6 +26,10 @@ const Clipboard = {
  */
 function show() {
     Clipboard.state = 'visible'
+}
+
+function fen_to_clipboard() {
+    navigator.clipboard.writeText(Board.chessjs.fen())
 }
 
 function import_pgn() {
