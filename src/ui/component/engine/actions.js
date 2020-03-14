@@ -4,30 +4,39 @@
 const m = require('mithril')
 const stream = require('mithril/stream')
 const cache = require('../../../lib/cache')
+const queue = require('../../../lib/queue')
 
 /**
  * @property {mithril/stream} status -
  * @property {mithril/stream} analysis - Used to display analysis from Resker
  */
 const EngineActions = {
-    status: stream('idle'),
+    status: stream('init'),
     analysis: stream({}),
     add_to_resker_queue,
     fetch_analysis,
     xhr: null,
     cache: new cache({ name: 'resker.position' }),
+    queue: new queue()
 }
 window.actions = EngineActions
+
 /**
 * When pressed adds the current position to the resker queue
-* @param {Number} [depth_goal=40]
-* @param {Number} [priority=40]
+* @param {Number} [param.depth_goal=40]
+* @param {Number} [param.priority=40]
+* @param {String} [param.fen] - Defaults to the current fen
 */
-async function add_to_queue(param) {
+async function add_to_resker_queue(param) {
     const pgn_moves = require('../pgn/moves')
     param = Object.assign({}, { depth_goal: 40, priority: 10 }, param)
     assert_valid_key()
     EngineActions.status('Queuing')
+    const body_params = {
+        fen: param.fen || pgn_moves.move_list.current_fen,
+        depth_goal: param.depth_goal || 40,
+        priority: param.priority || 10 // resker has a bug, it sets this to 5 all the time
+    }
     const res = await m.request({
         method: 'POST',
         url: localStorage.getItem('settings.engine.resker.host') + '/position',
@@ -35,13 +44,9 @@ async function add_to_queue(param) {
             'x-api-key': localStorage.getItem('settings.engine.resker.api_key'),
             resker_client: localStorage.getItem('settings.engine.resker.client')
         },
-        body: {
-            fen: pgn_moves.move_list.current_fen,
-            depth_goal: param.depth_goal || 40,
-            priority: param.priority || 10 // resker has a bug, it sets this to 5 all the time
-        }
+        body: body_params
     })
-    EngineActions.status('idle')
+    EngineActions.status(`Added to resker with depth: ${body_params.depth_goal}`)
 }
 
 
@@ -51,6 +56,7 @@ async function add_to_queue(param) {
  */
 async function fetch_analysis(fen) {
     console.log('[Engine:fetch_analysis]', fen)
+    EngineActions.status('Fetching from resker...')
     if (!fen) {
         throw new Error('Fen cannot be empty')
     }
@@ -76,13 +82,14 @@ async function fetch_analysis(fen) {
             EngineActions.analysis(Object.assign({ status: 0 }))
             queue_position_on_resker(fen)
         } else {
-            console.log('[Engine:fetch_analysis] Setting analysis on step 3.3')
+            console.log('[Engine:fetch_analysis] Setting analysis on step 3.3', analysis)
             EngineActions.analysis(analysis)
             EngineActions.status(analysis.status)
             store_analysis_in_local_cache(analysis)
         }
     }
 }
+
 function store_analysis_in_local_cache(analysis) {
     if (localStorage.getItem('settings.engine.resker.cache.enabled') != 'on') {
         console.log('[Engine::store_analysis_in_local_cache] Not storing because caching is disabled')
@@ -101,12 +108,14 @@ function store_analysis_in_local_cache(analysis) {
     EngineActions.cache.set(cache_params)
 }
 
+async function fetch_position_from_resker(fen) {
+    console.log('[Engine:fetch_position_from_resker] fen: ', fen)
     if (EngineActions.xhr !== null) {
+        console.log('[Engine:fetch_position_from_resker] aborting')
         EngineActions.xhr.abort()
         EngineActions.xhr = null
     }
 
-    // @todo implement caching
     const res = await m.request({
         method: 'GET',
         config: xhr => EngineActions.xhr = xhr,
@@ -117,31 +126,21 @@ function store_analysis_in_local_cache(analysis) {
             resker_client: localStorage.getItem('settings.engine.resker.client')
         }
     })
+    EngineActions.xhr = null
+    console.log('[Engine::fetch_position_from_resker] Fetched:', res)
+    return res
+}
 
-    console.log('[Engine::fetch_analysis] First fetch:', res)
-    EngineActions.analysis(res) // Displays or visually clears the analysis lines
-    if (!res) {
-        EngineActions.analysis(Object.assign(
-            { status: 0 },
-            res
-        ))
-        console.log('[Engine::fetch_analysis] auto-queuing')
-        await add_to_queue({
-            depth_goal: parseInt(localStorage.getItem('settings.engine.resker.auto_depth_goal')) || 30,
-            multipv_goal: parseInt(localStorage.getItem('settings.engine.resker.auto_multipv_goal')) || 4,
-            priority: 1
-        })
-        fetch_analysis(fen)
-    } else {
-        console.log('[Engine::fetch_analysis] Fetched analysis and streaming it:', res)
-        /* EngineActions.cache[ fen ] = new fig({
-            ttl: '15m',
-            value: res
-        }) */
-        EngineActions.analysis(res)
-        EngineActions.status(res.status)
-    }
-
+async function queue_position_on_resker(fen) {
+    assert_valid_key()
+    EngineActions.status('Adding to resker')
+    console.log('[Engine:queue_position_on_resker] queueing')
+    await add_to_resker_queue({
+        fen,
+        depth_goal: parseInt(localStorage.getItem('settings.engine.resker.auto_depth_goal')) || 30,
+        multipv_goal: parseInt(localStorage.getItem('settings.engine.resker.auto_multipv_goal')) || 4,
+        priority: 1
+    })
 }
 
 function assert_valid_key() {

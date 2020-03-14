@@ -126,7 +126,7 @@ function format_analysis(result) {
         fen: result._id,
         vnodes
     }
-    Engine.status = 'idle'
+    Engine.status = `Fetched at depth ${EngineActions.analysis().depth_goal}`
     return vnodes
 }
 
