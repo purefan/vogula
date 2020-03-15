@@ -1,13 +1,13 @@
 const m = require('mithril')
 const moves = require('../../moves')
 const Board = require('../../../board/chessground')
+const modal = require('../../../../../lib/modal')
 require('./index.scss')
 
 const Clipboard = {
     show,
     state: 'hidden',
-    view: () => m('div.pgn_toolbar_clipboard', { class: `modal ${Clipboard.state}` }, m('div.modal-content', [
-        m('button.close-modal', { onclick: e => Clipboard.state = 'hidden' }, 'Close'),
+    content: m('div.pgn_toolbar_clipboard', {}, [
         m('label', { for: 'clipboard_textarea' }, 'Paste the PGN or the FEN in the text box below:'),
         m('textarea', {
             id: 'clipboard_textarea',
@@ -18,7 +18,7 @@ const Clipboard = {
             m('button', { onclick: fen_to_clipboard }, 'Copy position to clipboard'),
             m('button', 'Copy game to clipboard')
         ])
-    ]))
+    ])
 }
 
 /**
@@ -26,6 +26,8 @@ const Clipboard = {
  */
 function show() {
     Clipboard.state = 'visible'
+    modal.content = Clipboard.content
+    modal.state = 'visible'
 }
 
 function fen_to_clipboard() {

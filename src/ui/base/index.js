@@ -1,4 +1,5 @@
 const m = require('mithril')
+const modal = require('../../lib/modal')
 const board = require('../component/board')
 const pgn = require('../component/pgn')
 const promote = require('../component/board/promote') // Needed here because chessground overtakes the component
@@ -25,7 +26,8 @@ const Base = {
         m('div.db-container-toolbar.toolbar-container', 'db-toolbar'),
         m('div.db-container-data', 'db-data'),
         m('div.db-container-status', 'db-status')
-      ])
+      ]),
+      m(modal)
     ])
 }
 

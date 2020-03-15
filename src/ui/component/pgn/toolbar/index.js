@@ -11,10 +11,9 @@ const pgn_toolbar = {
             title: 'Clear moves and headers'
         }, 'Clear'),
         m('button.toolbar-item', {
-            onclick: e => clipboard.show()
+            onclick: () => clipboard.show()
             , title: 'Copy to and from Clipboard'
-        }, 'Clipboard'),
-        m(clipboard)
+        }, 'Clipboard')
     ]
 }
 
