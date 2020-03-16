@@ -4,26 +4,14 @@ const EngineActions = require('../actions')
 const moves = require('../../pgn/moves')
 const chess = require('chess.js')
 const pgn = require('../../../../lib/pgn')
-const clipboard = require('../../pgn/toolbar/clipboard')
 
 require('./index.scss')
-/**
- * Queries resker for analysis and allows to queue a position.
- * Updates analysis when a new move is displayed if it exists in resker
- * Updates the analysis display every time moves.move_list.current_move changes
- * by triggering EngineActions.fetch_analysis
- */
 
+/**
+ * Formats the analysis stored in EngineActions
+ */
 const Engine = {
-    oninit: () => {
-        stream.lift(move_id => {
-            if (clipboard.state == 'hidden') {
-                console.log('[Engine] triggering fetch_analysis because current_move changed')
-                EngineActions.fetch_analysis(moves.move_list.moves[ move_id ].fen)
-            }
-        }, moves.move_list.current_move)
-    }
-    , status: 'idle'
+    status: 'idle'
     , cache: {} // Simple caching
     , analysis: {}
     , view: () => m('div.engine_analysis', m('div.table', [

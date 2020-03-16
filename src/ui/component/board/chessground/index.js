@@ -2,7 +2,7 @@ const Chessground = require("chessground").Chessground
 const m = require('mithril')
 const chessjs = require('chess.js')
 const moves = require('../../pgn/moves')
-
+const EngineActions = require('../../engine/actions')
 require('./chessground.scss')
 require('./theme.scss')
 require('./index.scss')
@@ -69,6 +69,11 @@ Board.config = {
                         dests: Board.make_dests(Board.chessjs)
                     }
                 })
+
+                Board.vnode.dispatchEvent(new CustomEvent('Board.ready', {
+                    detail: { move }
+                }))
+
             }
         }
     }
@@ -110,8 +115,25 @@ Board.make_dests = chess => {
 }
 
 Board.oncreate = vnode => {
+    Board.vnode = vnode.dom
     Board.config.movable.dests = Board.make_dests(Board.chessjs)
     window.chessground = Board.chessground = Chessground(vnode.dom, Board.config)
+
+
+    Board.vnode.addEventListener('Board.ready', Board.process_queue_after_move)
+}
+
+Board.queue_after_move = []
+/**
+ * Coordinates all the side effects of drag and dropping a piece
+ */
+Board.process_queue_after_move = async e => {
+    e = e || {}
+    console.log('[Event:Board:process_queue_after_move]', e)
+
+    if (Board.is_processing_queue) { }
+    EngineActions.fetch_analysis(Board.chessjs.fen())
+
 }
 
 Board.view = () => m('div', {
@@ -126,7 +148,7 @@ const letter_to_color = {
 /**
  * Syncs chessjs into chessground
  */
-Board.sync = () => {
+Board.sync = async () => {
     const lastMove = []
     if (Board.chessjs.history({ verbose: true }).length > 0) {
         const move = Board.chessjs.history({ verbose: true }).pop()
@@ -150,8 +172,9 @@ Board.sync = () => {
                     dests: Board.make_dests(Board.chessjs)
                 })
         })
-    console.log('fixed config', fixed_config)
+    console.log('[Board::sync] Fixed config', fixed_config)
     Board.chessground.set(fixed_config)
+    return new Promise(resolve => setTimeout(resolve, 200))
 }
 
 

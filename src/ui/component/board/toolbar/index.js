@@ -3,8 +3,8 @@ const Board = require('../chessground')
 const Moves = require('../../pgn/moves')
 const toolbar = {
     oninit: () => {
+        toolbar.is_running = false
         document.onkeydown = e => {
-            e.preventDefault()
             if (e.keyCode == 39) {
                 move_forwards()
             }
@@ -29,11 +29,14 @@ function toggle_orientation() {
  * Moves backwards one move and syncs the chessground configuration
  * it is triggered by pressing a key or clicking on a button
  */
-function move_backwards() {
-    if (Moves.move_list.move_backward()) {
+async function move_backwards() {
+    if (!toolbar.is_running && Moves.move_list.move_backward()) {
+        toolbar.is_running = true
         Board.chessjs.load(Moves.move_list.current_fen)
-        Board.sync()
         Moves.move_list.update_vnodes()
+        await Board.sync()
+        await Board.process_queue_after_move()
+        toolbar.is_running = false
     }
 }
 
@@ -41,11 +44,14 @@ function move_backwards() {
  * Moves forwards one move and syncs the chessground configuration
  * it is triggered by pressing a key or clicking on a button
  */
-function move_forwards() {
-    if (Moves.move_list.move_forward()) {
+async function move_forwards() {
+    if (!toolbar.is_running && Moves.move_list.move_forward()) {
+        toolbar.is_running = true
         Board.chessjs.load(Moves.move_list.current_fen)
-        Board.sync()
         Moves.move_list.update_vnodes()
+        await Board.sync()
+        await Board.process_queue_after_move()
+        toolbar.is_running = false
     }
 }
 module.exports = toolbar
