@@ -24,7 +24,7 @@ window.actions = EngineActions
 /**
 * When pressed adds the current position to the resker queue
 * @param {Number} [param.depth_goal=40]
-* @param {Number} [param.priority=40]
+* @param {Number} [param.priority=5]
 * @param {String} [param.fen] - Defaults to the current fen
 */
 async function add_to_resker_queue(param) {
@@ -35,18 +35,24 @@ async function add_to_resker_queue(param) {
     const body_params = {
         fen: param.fen || pgn_moves.move_list.current_fen,
         depth_goal: param.depth_goal || 40,
-        priority: param.priority || 10 // resker has a bug, it sets this to 5 all the time
+        priority: param.priority || 5
     }
-    const res = await m.request({
-        method: 'POST',
-        url: localStorage.getItem('settings.engine.resker.host') + '/position',
-        headers: {
-            'x-api-key': localStorage.getItem('settings.engine.resker.api_key'),
-            resker_client: localStorage.getItem('settings.engine.resker.client')
-        },
-        body: body_params
+    return new Promise((resolve, reject) => {
+        m.request({
+            method: 'POST',
+            url: localStorage.getItem('settings.engine.resker.host') + '/position',
+            headers: {
+                'x-api-key': localStorage.getItem('settings.engine.resker.api_key'),
+                resker_client: localStorage.getItem('settings.engine.resker.client')
+            },
+            body: body_params
+        }).then((res) => {
+            EngineActions.status(`Added to resker with depth: ${body_params.depth_goal}`)
+            resolve(res)
+        })
     })
-    EngineActions.status(`Added to resker with depth: ${body_params.depth_goal}`)
+
+
 }
 
 
@@ -84,7 +90,7 @@ async function fetch_analysis(fen) {
         } else {
             console.log('[Engine:fetch_analysis] Setting analysis on step 3.3', analysis)
             EngineActions.analysis(analysis)
-            EngineActions.status(analysis.status)
+            EngineActions.status(analysis)
             store_analysis_in_local_cache(analysis)
         }
     }
@@ -116,19 +122,23 @@ async function fetch_position_from_resker(fen) {
         EngineActions.xhr = null
     }
 
-    const res = await m.request({
-        method: 'GET',
-        config: xhr => EngineActions.xhr = xhr,
-        url: localStorage.getItem('settings.engine.resker.host') + '/position',
-        headers: {
-            'x-api-key': localStorage.getItem('settings.engine.resker.api_key'),
-            fen,
-            resker_client: localStorage.getItem('settings.engine.resker.client')
-        }
+    return new Promise((resolve, reject) => {
+        m.request({
+            method: 'GET',
+            config: xhr => EngineActions.xhr = xhr,
+            url: localStorage.getItem('settings.engine.resker.host') + '/position',
+            headers: {
+                'x-api-key': localStorage.getItem('settings.engine.resker.api_key'),
+                fen,
+                resker_client: localStorage.getItem('settings.engine.resker.client')
+            }
+        }).then(res => {
+            EngineActions.xhr = null
+            console.log('[Engine::fetch_position_from_resker] Fetched:', res)
+            resolve(res)
+        })
     })
-    EngineActions.xhr = null
-    console.log('[Engine::fetch_position_from_resker] Fetched:', res)
-    return res
+
 }
 
 async function queue_position_on_resker(fen) {

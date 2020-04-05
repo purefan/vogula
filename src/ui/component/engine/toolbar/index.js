@@ -11,7 +11,7 @@ const Toolbar = {
         m(settings),
 
         m('button', {
-            onclick: actions.add_to_queue
+            onclick: actions.add_to_resker_queue
         }, 'Queue')
     ])
 }
