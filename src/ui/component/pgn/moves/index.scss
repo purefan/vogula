@@ -7,6 +7,8 @@ div.move_list {
 
     position: relative;
     padding-left: 6px;
+    padding-bottom: 2px;
+    overflow: auto;
 
     span.move {
         text-align: center;
