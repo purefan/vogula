@@ -1,6 +1,7 @@
 const m = require('mithril')
 const Board = require('../chessground')
 const Moves = require('../../pgn/moves')
+require('./index.scss')
 const toolbar = {
     oninit: () => {
         toolbar.is_running = false
@@ -14,15 +15,44 @@ const toolbar = {
         }
     },
     view: () => [
+        m('button.toolbar-item', { onclick: () => move_to_start() }, '<<'),
         m('button.toolbar-item', { onclick: () => move_backwards() }, '<'),
         m('button.toolbar-item', { onclick: () => toggle_orientation() }, 'Flip'),
-        m('button.toolbar-item', { onclick: () => move_forwards() }, '>')
+        m('button.toolbar-item', { onclick: () => move_forwards() }, '>'),
+        m('button.toolbar-item', { onclick: () => move_to_end() }, '>>')
     ]
 }
 
 function toggle_orientation() {
     Board.chessground.toggleOrientation()
     localStorage.setItem('board.orientation', Board.chessground.state.orientation)
+}
+
+async function move_to_end() {
+    if (!toolbar.is_running) {
+        toolbar.is_running = true
+        while (Moves.move_list.move_forward());
+        Board.chessjs.load(Moves.move_list.current_fen)
+        Moves.move_list.update_vnodes()
+        await Board.sync()
+        await Board.process_queue_after_move()
+        toolbar.is_running = false
+    }
+}
+
+/**
+ * Moves all the way to the beginning, before white's first move
+ */
+async function move_to_start() {
+    if (!toolbar.is_running) {
+        toolbar.is_running = true
+        while (Moves.move_list.move_backward());
+        Board.chessjs.load(Moves.move_list.current_fen)
+        Moves.move_list.update_vnodes()
+        await Board.sync()
+        await Board.process_queue_after_move()
+        toolbar.is_running = false
+    }
 }
 
 /**
