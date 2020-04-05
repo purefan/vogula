@@ -11,22 +11,26 @@ const Status = {
 
 module.exports = Status
 
-function format_status(status) {
-    if (status == 0) {
-        return m('div', { class: 'analysis engine_status_' + status }, 'Analysis queued')
+function format_status(analysis) {
+    if (analysis.status == 0) {
+        return m('div', { class: 'analysis engine_status_' + analysis.status }, `Analysis queued: ${analysis.depth_goal}x${analysis.multipv_goal}`)
     }
 
-    if (status == 1) {
-        return m('div', { class: 'analysis engine_status_' + status }, 'Analysis in progress')
+    if (analysis.status == 1) {
+        return m('div', { class: 'analysis engine_status_' + analysis.status }, `Analysis in progress: ${analysis.depth_goal}x${analysis.multipv_goal}`)
     }
 
-    if (status == 2) {
-        return m('div', { class: 'analysis engine_status_' + status }, 'Analysis completed')
+    if (analysis.status == 2) {
+        return m('div', { class: 'analysis engine_status_' + analysis.status }, 'Analysis completed')
     }
 
-    if (status == 'idle') {
-        return m('div', { class: 'analysis engine_status_' + status }, 'Idle')
+    if (analysis.status == 'idle') {
+        return m('div', { class: 'analysis engine_status_' + analysis.status }, 'Idle')
     }
 
-    return m('div', { class: 'analysis' }, ' Unformated status ' + status)
+    if (analysis == 'init') {
+        return m('div', { class: 'analysis engine_status_init' }, 'Ready')
+    }
+
+    return m('div', { class: 'analysis' }, analysis)
 }
