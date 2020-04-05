@@ -53,9 +53,15 @@ const Settings = {
                     m('input.onoff', {
                         type: 'checkbox',
                         id: 'resker_onoff',
-                        value: localStorage.getItem('settings.engine.resker.enabled'),
-                        checked: localStorage.getItem('settings.engine.resker.enabled'),
-                        onchange: e => localStorage.setItem('settings.engine.resker.enabled', e.target.value)
+                        value: localStorage.getItem('settings.engine.resker.enabled') === 'true',
+                        checked: localStorage.getItem('settings.engine.resker.enabled') === 'true',
+                        onchange: e => {
+                            if (localStorage.getItem('settings.engine.resker.enabled') === 'true') {
+                                localStorage.setItem('settings.engine.resker.enabled', 'false')
+                            } else {
+                                localStorage.setItem('settings.engine.resker.enabled', 'true')
+                            }
+                        }
                     }),
                     m('label.onoff', { for: 'resker_onoff' })
                 ])
