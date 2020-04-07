@@ -21,7 +21,7 @@ function new_game() {
     Moves.move_list.reset()
     Board.chessjs.load(Moves.move_list.current_fen)
     Board.sync()
-    headers.data(headers.make_default_headers())
+    headers.set_headers(headers.make_default_headers())
     m.redraw()
 }
 
