@@ -16,7 +16,14 @@ const pgn_moves = {
     move_list: new PGN.MovesList(),
     current_move
 }
+
 pgn_moves.view = () => m('div.move_list.tree-branch', pgn_moves.move_list.vnodes())
+
+/**
+ *
+ * @param {String} [id]
+ * @return {PGN.Move}
+ */
 function current_move(id) {
     if (id) {
         pgn_moves.move_list.current_move(id)
@@ -25,6 +32,7 @@ function current_move(id) {
         return pgn_moves.move_list.current_move()
     }
 }
+
 /**
  * Appends a move to pgn_moves.moves
  * 2 triggers for this function:

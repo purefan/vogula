@@ -28,7 +28,7 @@ class MovesList {
     }
 
     /**
-     *
+     * Adds one move to the list
      * @param {Move} move
      */
     add_move(move) {
@@ -133,8 +133,8 @@ class MovesList {
     /**
      *
      * @param {*} full_pgn
-     *
-     [Event ""]
+     * @example
+[Event ""]
 [Site ""]
 [Date "????.??.??"]
 [Round ""]
@@ -147,6 +147,26 @@ class MovesList {
 16.Qd2 Rad8 17.b3 Qb8
     ( 17...Ba8 18.Nh2 )
 *
+    * @example
+[Event "Rated Classical game"]
+[Site "https://lichess.org/RtRAV1DX"]
+[Date "2020.03.20"]
+[Round "-"]
+[White "chessinblackandwhite"]
+[Black "purefan"]
+[Result "0-1"]
+[WhiteElo "2111"]
+[BlackElo "2105"]
+[TimeControl "1800+30"]
+[Termination "Normal"]
+[UTCDate "2020.03.21"]
+[UTCTime "11:04:50"]
+[Variant "Standard"]
+[ECO "B43"]
+[Opening "Sicilian Defense: Kan Variation, Knight Variation"]
+[Annotator "https://lichess.org/@/purefan"]
+
+1. e4 { [%clk 0:30:00] } c5 { [%clk 0:30:00] } 2. Nf3 { [%clk 0:30:10] } e6 { [%clk 0:30:23] }
 
      */
     import_pgn(full_pgn) {
@@ -155,15 +175,13 @@ class MovesList {
         this.first_move
         let next_move = null
         let san_to_import = null
-
         if (this.moves_count < 1) {
-            headers.data(game_parts.headers)
+            headers.set_headers(game_parts.headers)
         }
 
         for (move in game_parts.moves) {
             next_move = this.moves[ this.current_move() ].next_move
             san_to_import = game_parts.moves[ move ]
-
             // Entering RAV
             if (san_to_import.includes('(')) {
                 this.move_backward()
@@ -213,19 +231,16 @@ class MovesList {
                 if (header_parts) {
                     headers[ header_parts[ 1 ] ] = header_parts[ 2 ]
                 }
-
             })
         }
         return {
             headers,
             moves: match[ 2 ]
                 .replace(/\r?\n|\r/g, ' ')
-                .replace(/\s\s+/g, ' ')
+                .replace(/\s\s+/g, ' ') // not perfect but 7+% of the time works every time
                 .replace(/[\d]+[\.]{1,3}\s(\w)/g, '$1') // Remove space after move number 4. d3 --> 4.d3
                 .replace(/\(/, ' ( ') // add a space so we can easily tell when a variation starts
                 .replace(/\)/, ' ) ') // and ends in the for loop
-                .replace(/\{/, '') // Same technique for comments
-                .replace(/\}/, '') //
                 .replace(/[\d]+\./g, '') // remove numbers
                 .split(' ')
                 .map(san => san.replace(/\s/g, ''))
@@ -306,6 +321,24 @@ class Move {
         this.is_first_move_in_rav = false
         this.is_white_move = param.fen.split(' ')[ 1 ] == 'b' // because the fen is after the move was played
         this.comment_after_move = ''
+        this.clk = '' // "remaining time to next time control" i.e. time left
+    }
+    /**
+     * Normally it just appends strings (to comment_after_move) to be displayed when making the vnode
+     * but if the current comment string includes an extension command it processes into a different
+     * variable.
+     * The idea of processing it here is to alleviate the processing when making the vnode, which can
+     * happen more than once per move.
+     * @see https://www.enpassant.dk/chess/palview/enhancedpgn.htm
+     * @param {String} comment
+     */
+    add_comment(comment) {
+        this.comment_after_move += comment
+        const clk_regex = /%clk\s?(\d+:\d+:\d+)/i
+        const matched = this.comment_after_move.match(clk_regex)
+        if (matched) {
+            this.clk = matched[ 1 ]
+        }
     }
 
     /**
@@ -320,9 +353,10 @@ class Move {
         } else if (this.is_first_move_in_rav) {
             move_number = `${Math.ceil(this.half_move / 2)}...`
         }
+
         return [
             m('span.move', {
-                onclick: () => {
+                onclick: async () => {
                     const Board = require('../ui/component/board/chessground')
                     const Moves = require('../ui/component/pgn/moves')
                     // We need to find this moves squares to update the highlighted squares
@@ -332,14 +366,15 @@ class Move {
                     } else {
                         Board.chessjs.load(this.fen)
                     }
-
-                    Board.sync()
+                    await Board.sync()
+                    await Board.process_queue_after_move()
                     Moves.current_move(this.id)
                 },
                 'data-id': this.id,
                 'data-fen': this.fen,
+                'data-clk': this.clk,
                 class: `move ${this.is_white_move ? 'white_move' : 'black_move'} ${param && param.current_move == this.id ? 'current_move' : ''}`
-            }, `${move_number} ${this.san} ${this.comment_after_move ? '{' + this.comment_after_move + '}' : ''}`)
+            }, `${move_number} ${this.san} ${this.comment_after_move ? this.comment_after_move : ''}`)
         ]
     }
 }
