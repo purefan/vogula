@@ -3,6 +3,7 @@ require('./index.scss')
 
 const Settings = {
     state: 'hidden',
+    stats: {},
     view: () => m('div', { class: `modal ${Settings.state}` }, m('div.modal-content', [
         m('button.close-modal', { onclick: e => Settings.state = 'hidden' }, 'Close'),
         m('div.table', [
