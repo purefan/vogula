@@ -88,6 +88,10 @@ const Settings = {
             m('div.tr', [
                 m('div.td', m('button', { onclick: test_resker }, 'Test Resker')),
                 m('div.td', Settings.resker_test_result)
+            ]),
+            m('div.tr.stats', [
+                m('div.td', m('button', { onclick: get_stats }, 'Get Stats')),
+                m('div.td', Object.keys(Settings.stats).map(type => m('div.stat_row', [ m('span', type.replace('_', ' ')), Settings.stats[ type ] ])))
             ])
         ])
     ])),
@@ -95,6 +99,18 @@ const Settings = {
         Settings.state = 'visible'
         m.redraw()
     }
+}
+
+async function get_stats() {
+    Settings.stats = await m.request({
+        url: localStorage.getItem('settings.engine.resker.host') + '/stats',
+        method: 'GET',
+        resker_client: localStorage.getItem('settings.engine.resker.client'),
+        headers: {
+            'x-api-key': localStorage.getItem('settings.engine.resker.api_key'),
+            resker_client: localStorage.getItem('settings.engine.resker.client')
+        }
+    })
 }
 
 /**
