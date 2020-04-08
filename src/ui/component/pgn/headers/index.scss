@@ -41,5 +41,12 @@
                 }
             }
         }
+
+        &[data-group_name="clock"] {
+            span {
+                margin-left: 6px;
+                margin-right: 6px;
+            }
+        }
     }
 }
