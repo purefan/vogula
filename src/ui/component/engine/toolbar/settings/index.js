@@ -1,8 +1,10 @@
 const m = require('mithril')
+const tooltip = require('../../../../../lib/tooltip')
 require('./index.scss')
 
 const Settings = {
     state: 'hidden',
+    stats: {},
     view: () => m('div', { class: `modal ${Settings.state}` }, m('div.modal-content', [
         m('button.close-modal', { onclick: e => Settings.state = 'hidden' }, 'Close'),
         m('div.table', [
@@ -86,8 +88,31 @@ const Settings = {
                 ])
             ]),
             m('div.tr', [
+                m('div.td', [ 'Smart Priority', tooltip('Auto prioritize depending on the half move, the lower the half move, the higher the prio, up to 37 (median game length)') ]),
+                m('div', { class: 'td onoff' }, [
+                    m('input.onoff', {
+                        type: 'checkbox',
+                        id: 'smart_prio_onoff',
+                        value: localStorage.getItem('settings.engine.resker.smart_prio.enabled') === 'true',
+                        checked: localStorage.getItem('settings.engine.resker.smart_prio.enabled') === 'true',
+                        onchange: e => {
+                            if (localStorage.getItem('settings.engine.resker.smart_prio.enabled') === 'true') {
+                                localStorage.setItem('settings.engine.resker.smart_prio.enabled', 'false')
+                            } else {
+                                localStorage.setItem('settings.engine.resker.smart_prio.enabled', 'true')
+                            }
+                        }
+                    }),
+                    m('label.onoff', { for: 'smart_prio_onoff' })
+                ])
+            ]),
+            m('div.tr', [
                 m('div.td', m('button', { onclick: test_resker }, 'Test Resker')),
                 m('div.td', Settings.resker_test_result)
+            ]),
+            m('div.tr.stats', [
+                m('div.td', m('button', { onclick: get_stats }, 'Get Stats')),
+                m('div.td', Object.keys(Settings.stats).map(type => m('div.stat_row', [ m('span', type.replace('_', ' ')), Settings.stats[ type ] ])))
             ])
         ])
     ])),
@@ -95,6 +120,18 @@ const Settings = {
         Settings.state = 'visible'
         m.redraw()
     }
+}
+
+async function get_stats() {
+    Settings.stats = await m.request({
+        url: localStorage.getItem('settings.engine.resker.host') + '/stats',
+        method: 'GET',
+        resker_client: localStorage.getItem('settings.engine.resker.client'),
+        headers: {
+            'x-api-key': localStorage.getItem('settings.engine.resker.api_key'),
+            resker_client: localStorage.getItem('settings.engine.resker.client')
+        }
+    })
 }
 
 /**
