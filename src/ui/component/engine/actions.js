@@ -37,6 +37,13 @@ async function add_to_resker_queue(param) {
         depth_goal: param.depth_goal || 40,
         priority: param.priority || 5
     }
+
+    if (localStorage.getItem('settings.engine.resker.smart_prio.enabled') === 'true') {
+        const fen_parts = body_params.fen.split(' ')
+        const calculated_priority = 38 - fen_parts[ 5 ] // 1st move = 37 = median length
+        body_params.priority = calculated_priority < 1 ? 1 : calculated_priority
+    }
+
     return new Promise((resolve, reject) => {
         m.request({
             method: 'POST',
@@ -47,7 +54,7 @@ async function add_to_resker_queue(param) {
             },
             body: body_params
         }).then((res) => {
-            EngineActions.status(`Added to resker with depth: ${body_params.depth_goal}`)
+            EngineActions.status(`Added to resker with depth: ${body_params.depth_goal}@${body_params.priority}`)
             resolve(res)
         })
     })

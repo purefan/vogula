@@ -1,4 +1,5 @@
 const m = require('mithril')
+const tooltip = require('../../../../../lib/tooltip')
 require('./index.scss')
 
 const Settings = {
@@ -84,6 +85,25 @@ const Settings = {
                         }
                     }),
                     m('label.onoff', { for: 'cache_onoff' })
+                ])
+            ]),
+            m('div.tr', [
+                m('div.td', [ 'Smart Priority', tooltip('Auto prioritize depending on the half move, the lower the half move, the higher the prio, up to 37 (median game length)') ]),
+                m('div', { class: 'td onoff' }, [
+                    m('input.onoff', {
+                        type: 'checkbox',
+                        id: 'smart_prio_onoff',
+                        value: localStorage.getItem('settings.engine.resker.smart_prio.enabled') === 'true',
+                        checked: localStorage.getItem('settings.engine.resker.smart_prio.enabled') === 'true',
+                        onchange: e => {
+                            if (localStorage.getItem('settings.engine.resker.smart_prio.enabled') === 'true') {
+                                localStorage.setItem('settings.engine.resker.smart_prio.enabled', 'false')
+                            } else {
+                                localStorage.setItem('settings.engine.resker.smart_prio.enabled', 'true')
+                            }
+                        }
+                    }),
+                    m('label.onoff', { for: 'smart_prio_onoff' })
                 ])
             ]),
             m('div.tr', [
