@@ -237,7 +237,7 @@ class MovesList {
             headers,
             moves: match[ 2 ]
                 .replace(/\r?\n|\r/g, ' ')
-                .replace(/\s\s+/g, ' ') // not perfect but 7+% of the time works every time
+                .replace(/\s\s+/g, ' ') // not perfect but 70% of the time works every time
                 .replace(/[\d]+[\.]{1,3}\s(\w)/g, '$1') // Remove space after move number 4. d3 --> 4.d3
                 .replace(/\(/, ' ( ') // add a space so we can easily tell when a variation starts
                 .replace(/\)/, ' ) ') // and ends in the for loop
