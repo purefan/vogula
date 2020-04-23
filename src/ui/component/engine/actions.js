@@ -5,6 +5,7 @@ const m = require('mithril')
 const stream = require('mithril/stream')
 const cache = require('../../../lib/cache')
 const queue = require('../../../lib/queue')
+const request = require('../../../lib/request')
 
 /**
  * @property {mithril/stream} status -
@@ -45,7 +46,7 @@ async function add_to_resker_queue(param) {
     }
 
     return new Promise((resolve, reject) => {
-        m.request({
+        request({
             method: 'POST',
             url: localStorage.getItem('settings.engine.resker.host') + '/position',
             headers: {
@@ -58,13 +59,11 @@ async function add_to_resker_queue(param) {
             resolve(res)
         })
     })
-
-
 }
-
 
 /**
  * Requests the position from Resker
+ * Caching is implemented at network level with the Request library
  * @param {String} fen
  */
 async function fetch_analysis(fen) {
@@ -73,52 +72,19 @@ async function fetch_analysis(fen) {
     if (!fen) {
         throw new Error('Fen cannot be empty')
     }
-    const in_cache = EngineActions.cache.get(fen)
-    // 1. Do we have a stored analysis?
-    if (localStorage.getItem('settings.engine.resker.cache.enabled') == 'on' && in_cache) {
-        // 2. If yes, then send to show it
-        console.log('Engine::fetch_analysis] fen found in cache with value', in_cache)
-        EngineActions.analysis(in_cache)
-        EngineActions.status('Found in local cache')
-        return true
+
+    const analysis = await fetch_position_from_resker(fen)
+
+    if (!analysis || !analysis._id) {
+        // Add the position for analysis
+        console.log('[Engine:fetch_analysis] Setting empty analysis( status: 0 )')
+        EngineActions.analysis(Object.assign({ status: 0 }))
+        queue_position_on_resker(fen)
     } else {
-        console.log('[Engine::fetch] is caching enabled', localStorage.getItem('settings.engine.resker.cache.enabled') == true)
-
-        // 3. If not, then fetch from resker
-        // @todo queue this
-        const analysis = await fetch_position_from_resker(fen)
-
-        // 3.1 if Resker doesnt have it
-        if (!analysis) {
-            // 3.2 then add the position for analysis
-            console.log('[Engine:fetch_analysis] Setting empty analysis( status: 0 )')
-            EngineActions.analysis(Object.assign({ status: 0 }))
-            queue_position_on_resker(fen)
-        } else {
-            console.log('[Engine:fetch_analysis] Setting analysis on step 3.3', analysis)
-            EngineActions.analysis(analysis)
-            EngineActions.status(analysis)
-            store_analysis_in_local_cache(analysis)
-        }
+        console.log('[Engine:fetch_analysis] Setting analysis on step 3.3', analysis)
+        EngineActions.analysis(analysis)
+        EngineActions.status(analysis)
     }
-}
-
-function store_analysis_in_local_cache(analysis) {
-    if (localStorage.getItem('settings.engine.resker.cache.enabled') != 'on') {
-        console.log('[Engine::store_analysis_in_local_cache] Not storing because caching is disabled')
-    }
-    const one_hour = Date.now() + (60 * 60 * 1000)
-    const seven_days = Date.now() + (60 * 60 * 24 * 7 * 1000) //  7 days
-    let dies_at = seven_days // 1hr from now
-    if (analysis.analysis && analysis.analysis.length > 0) { // @todo potential bug with the dies_at
-        const analyzed_goals = analysis.analysis.map(analysis => analysis.depth)
-        if (analysis.depth_goal != Math.max(...analyzed_goals)) {
-            dies_at = one_hour
-        }
-    }
-    const cache_params = { name: analysis._id || analysis.fen, value: analysis, dies_at: dies_at }
-    console.log('[Engine::store_analysis_in_local_cache] Storing analysis in local cache:', JSON.stringify(cache_params).substr(0, 100))
-    EngineActions.cache.set(cache_params)
 }
 
 async function fetch_position_from_resker(fen) {
@@ -130,7 +96,7 @@ async function fetch_position_from_resker(fen) {
     }
 
     return new Promise((resolve, reject) => {
-        m.request({
+        request({
             method: 'GET',
             config: xhr => EngineActions.xhr = xhr,
             url: localStorage.getItem('settings.engine.resker.host') + '/position',
@@ -143,6 +109,10 @@ async function fetch_position_from_resker(fen) {
             EngineActions.xhr = null
             console.log('[Engine::fetch_position_from_resker] Fetched:', res)
             resolve(res)
+        }).catch(err => {
+            console.log('error', err)
+            EngineActions.analysis('')
+            queue_position_on_resker(fen)
         })
     })
 

@@ -12,16 +12,20 @@ const Status = {
 module.exports = Status
 
 function format_status(analysis) {
+    let cached = ''
+    if (analysis.from_cache) {
+        cached = '(Cached) '
+    }
     if (analysis.status == 0) {
-        return m('div', { class: 'analysis engine_status_' + analysis.status }, `Analysis queued: ${analysis.depth_goal}x${analysis.multipv_goal}`)
+        return m('div', { class: 'analysis engine_status_' + analysis.status }, `${cached}Analysis queued: ${analysis.depth_goal}x${analysis.multipv_goal}@${analysis.priority}`)
     }
 
     if (analysis.status == 1) {
-        return m('div', { class: 'analysis engine_status_' + analysis.status }, `Analysis in progress: ${analysis.depth_goal}x${analysis.multipv_goal}`)
+        return m('div', { class: 'analysis engine_status_' + analysis.status }, `${cached}Analysis in progress: ${analysis.depth_goal}x${analysis.multipv_goal}@${analysis.priority}`)
     }
 
     if (analysis.status == 2) {
-        return m('div', { class: 'analysis engine_status_' + analysis.status }, 'Analysis completed')
+        return m('div', { class: 'analysis engine_status_' + analysis.status }, `${cached}Analysis completed`)
     }
 
     if (analysis.status == 'idle') {
