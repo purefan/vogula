@@ -84,6 +84,7 @@ class cache_item {
         this.created_at = Date.now()
         this.key = param.key
         this.value = param.value
+        this.ttl = param.ttl
     }
 
     get() {
