@@ -16,7 +16,7 @@ class cache_manager {
     }
 
     get(name) {
-        if (!this.cache_items[ name ] || !this.cache_items[ name ].value) {
+        if (!this.cache_items[ name ] || !this.cache_items[ name ].value || !this.cache_items[ name ].ttl) {
             console.log(`[Cache:get(${name})] Doesnt exist`)
             this.expire(name)
             return null
@@ -84,6 +84,7 @@ class cache_item {
         this.created_at = Date.now()
         this.key = param.key
         this.value = param.value
+        this.ttl = param.ttl
     }
 
     get() {
