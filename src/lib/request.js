@@ -47,7 +47,7 @@ async function request(param) {
         console.log('[Cache::Network] Expiring the GET version of a POST request')
         cache.expire(cache_key_for_get)
     } else if (param.method.toLowerCase() == 'get') {
-        const ttl_param = Date.now() + ttl
+        const ttl_param = Date.now() + Number(ttl)
         console.log(`[Cache::Network] Storing a GET request in cache with ttl: ${ttl_param}`)
         if (result)
             cache.set({ name: key, value: result, ttl: ttl_param })
