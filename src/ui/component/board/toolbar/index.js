@@ -3,6 +3,8 @@ const Board = require('../chessground')
 const Moves = require('../../pgn/moves')
 require('./index.scss')
 const toolbar = {
+    move_forwards,
+    move_backwards,
     oninit: () => {
         toolbar.is_running = false
         document.onkeydown = e => {
