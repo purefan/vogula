@@ -60,9 +60,15 @@ function format_analysis(result) {
     const validator = new chess()
     const vnodes = analysis.steps
         .filter(step => step.depth == EngineActions.analysis().depth_goal)
+        // Make the array unique by comparing the first move in pv and taking
+        // the highest nodes count
         .reduce((acc, curr) => {
-            if (!acc.find(looking => looking.pv == curr.pv)) {
+            curr.first_pv = curr.pv.split(' ')[ 0 ]
+            const pos_found = acc.findIndex(looking_at => looking_at.first_pv == curr.first_pv)
+            if (pos_found < 0) {
                 acc.push(curr)
+            } else if (acc[ pos_found ].nodes < curr.nodes) {
+                acc[ pos_found ] = curr
             }
             return acc
         }, [])
