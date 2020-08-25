@@ -14,114 +14,105 @@ const Engine = {
     status: 'idle'
     , cache: {} // Simple caching
     , analysis: {}
+    , vnode_analysis: m('div', 'def')
     , view: () => m('div.engine_analysis', m('div.table', [
         m('div.tr', [
             m('div.td', 'Score'),
             m('div.td', 'Depth'),
             m('div.td', 'Line'),
         ]),
-        stream.lift(format_analysis, EngineActions.analysis)()
+        prepare(EngineActions.analysis())
+            .map(step =>
+                m('div.tr', {
+                    depth: step.depth,
+                    score: step.score.value
+                }, [
+                    m('div.td', step.centipawn),
+                    m('div.td', step.depth),
+                    m('div.td', m('div.move_list', step.move_list.map(move => move.make_vnode())))
+                ])
+            )
     ]))
 }
 
-window.engine = Engine
 
 /**
- * Formats the result of a chess engine analysis
+ *
+ * Removes low depth analysis
+ * Removes pvs that dont match the best move
+ * Removes duplicated best_moves (taking highest node count)
+ * Sorts according to eval respecting player turn
  * @param {Object} result
+ * @param {Array} result.analysis
+ * @param {Object} result.analysis[0]
+ *
+ * @returns {Array}
  */
-function format_analysis(result) {
-    if (Engine.cache.fen == result._id) {
-        console.log('[Analysis:format_analysis] Not processing the same position twice', result._id)
-        return Engine.cache.vnodes
+function prepare(result) {
+    console.log('[prepare]', result)
+    if (!result.analysis) {
+        return []
     }
+    const position = Object.assign({}, result)
+    // find the PVs with the highest depth
+    const max_depth = Math.max(...position.analysis.map(pv => pv.depth))
+    // take only the analysis with the highest depth
+    position.analysis = position.analysis.filter(pv => pv.depth == max_depth)
 
-    console.log('[Analysis:format_analysis]', result)
-
-    if (!result.analysis || result.analysis.length < 1) {
-        console.log('[Analysis:format_analysis] No analysis')
-        Engine.cache = {
-            fen: result._id,
-            vnodes: false
-        }
-        return false
-    }
-
-    // Find the deepest analysis, this causes a single engine to count
-    const analysis = result.analysis.reduce((acc, curr) => {
-        if (curr.depth > acc.depth) {
-            return curr
+    // There might be 2 analysis with depth = max and best_move equals between themselves
+    const dedupe_analysis = position.analysis.reduce((acc, curr) => {
+        if (!acc[ curr.best_move ] || acc[ curr.best_move ].nodes < curr.nodes) {
+            acc[ curr.best_move ] = curr
         }
         return acc
-    }, { depth: 0 })
-
-    const current_move = moves.move_list.moves[ moves.move_list.current_move() ]
-
-    const validator = new chess()
-    const vnodes = analysis.steps
-        .filter(step => step.depth == EngineActions.analysis().depth_goal)
-        // Make the array unique by comparing the first move in pv and taking
-        // the highest nodes count
+    }, {})
+    position.analysis = Object.values(dedupe_analysis)
+    // Extract all the steps from all the analysis
+    position.steps = position.analysis
         .reduce((acc, curr) => {
-            curr.first_pv = curr.pv.split(' ')[ 0 ]
-            const pos_found = acc.findIndex(looking_at => looking_at.first_pv == curr.first_pv)
-            if (pos_found < 0) {
-                acc.push(curr)
-            } else if (acc[ pos_found ].nodes < curr.nodes) {
-                acc[ pos_found ] = curr
-            }
+            acc = acc.concat(curr.steps)
             return acc
         }, [])
+        .filter(step => step.depth == max_depth)
         .map(step => {
-            validator.load(current_move.fen)
-            let current_half_move = moves.move_list.count_half_moves_before()
-            let eval_symbol = '+'
-            // is_white_move refers to the actual current_move, but when displaying
-            // we need "is white's turn to play", that is why it is "inverted" in this
-            // condition
-            if (
-                (!current_move.is_white_move && step.score.value < 0) ||
-                (current_move.is_white_move && step.score.value > 0)) {
-                eval_symbol = '-'
-            }
-            if (step.score.value == 0.0) {
-                eval_symbol = ''
-            }
-            return m('div.tr', {
-                depth: step.depth,
-                score: step.score.value
-            }, [
-                m('div.td', `${eval_symbol}${(Math.abs(step.score.value) / 100).toFixed(2)}`),
-                m('div.td', step.depth),
-                m('div.td', m('div.move_list', step.pv
+            const validator = new chess()
+            validator.load(result._id)
+            const steps = Object.assign(step, {
+                centipawn: Number.parseFloat(step.score.value / 100).toFixed(2),
+                move_list: step.pv
                     .split(' ')
                     .map(sloppy => {
+                        let current_half_move = moves.move_list.count_half_moves_before()
                         current_half_move++
                         const chess_move = validator.move(sloppy, { sloppy: true })
                         if (!chess_move) {
-                            return null
+                            throw new Error('invalid move')
                         }
-                        const move = new pgn.Move({
+                        return new pgn.Move({
                             san: chess_move.san,
                             fen: validator.fen(),
                             half_move: current_half_move
                         })
-                        return move.make_vnode()
                     })
-                ))
-            ])
+            })
+            steps.san = steps.move_list[0].san
+            return steps
         })
-    vnodes.sort((a, b) => {
-        console.log('Sorting', current_move.is_white_move, b.attrs.score, a.attrs.score)
-        if (!current_move.is_white_move) return b.attrs.score - a.attrs.score
-        return b.attrs.score - a.attrs.score
+        .reduce((acc, curr) => {
+            if (!acc[curr.san] || acc[curr.san].nodes < curr.nodes) {
+                acc[curr.san] = curr
+            }
+            return acc
+        }, {})
+    position.steps = Object.values(position.steps)
+    position.steps.sort((a, b) => {
+        if (result._id.split(' ')[1] != 'w') {
+            return a.score.value - b.score.value
+        }
+        return b.score.value - a.score.value
     })
-    Engine.cache = {
-        fen: result._id,
-        vnodes
-    }
-    Engine.status = `Fetched at depth ${EngineActions.analysis().depth_goal}`
-    return vnodes
+    console.log('[prepare] valid analysis', position)
+    return position.steps
 }
 
 
