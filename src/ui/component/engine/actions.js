@@ -13,7 +13,8 @@ const request = require('../../../lib/request')
  */
 const EngineActions = {
     status: stream('init'),
-    analysis: stream({}),
+    analysis_stream: stream({}),
+    analysis: set_analysis,
     add_to_resker_queue,
     fetch_analysis,
     xhr: null,
@@ -21,6 +22,18 @@ const EngineActions = {
     queue: new queue()
 }
 window.actions = EngineActions
+
+function set_analysis(result) {
+    if (!result || result == null || typeof result == undefined) {
+        console.log('[EngineActions] Requesting the value of the stream', EngineActions.analysis_stream())
+        return  EngineActions.analysis_stream()
+    }
+    if (EngineActions.analysis_cache == result._id) {
+        return console.log('[EngineActions] Not duplicating')
+    }
+    EngineActions.analysis_cache = result._id
+    EngineActions.analysis_stream(result)
+}
 
 /**
 * When pressed adds the current position to the resker queue
