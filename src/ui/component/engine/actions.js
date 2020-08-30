@@ -6,6 +6,7 @@ const stream = require('mithril/stream')
 const cache = require('../../../lib/cache')
 const queue = require('../../../lib/queue')
 const request = require('../../../lib/request')
+const PositionAnalysed = require('../../../lib/analysis')
 
 /**
  * @property {mithril/stream} status -
@@ -21,7 +22,6 @@ const EngineActions = {
     cache: new cache({ name: 'resker.position' }),
     queue: new queue()
 }
-window.actions = EngineActions
 
 function set_analysis(result) {
     if (!result || result == null || typeof result == undefined) {
@@ -32,11 +32,12 @@ function set_analysis(result) {
         return console.log('[EngineActions] Not duplicating')
     }
     EngineActions.analysis_cache = result._id
-    EngineActions.analysis_stream(result)
+    EngineActions.analysis_stream(new PositionAnalysed(result))
 }
 
 /**
 * When pressed adds the current position to the resker queue
+* @param {object} param
 * @param {Number} [param.depth_goal=40]
 * @param {Number} [param.priority=5]
 * @param {String} [param.fen] - Defaults to the current fen

@@ -34,7 +34,8 @@ class MovesList {
     add_move(move) {
         console.log('PGN::add_move(', move)
         if (move.id == this.current_move()) {
-            throw new Error('1. Duplicating move', this.moves)
+            console.error('1. Duplicating move',  this.moves)
+            throw new Error('1. Duplicating move')
         }
         if (this.current_move() && this.moves[ this.current_move() ].previous_move == move.id) {
             throw new Error('2. Duplicating previous move', this.moves)
@@ -222,6 +223,11 @@ class MovesList {
         this.update_vnodes()
     }
 
+    /**
+     *
+     * @param {String} full_pgn
+     * @returns {Object}
+     */
     separate_pgn_parts(full_pgn) {
         const match = /([\[\w\W]*)\n\n([\w\W\s]*)/gm.exec(`\n\n${full_pgn}`)
         const headers = {}
@@ -262,7 +268,7 @@ class MovesList {
     /**
      *
      * @param {Move} move
-     * @param {Move} last_move - Used to avoid printing duplicates
+     * @param {Move} [last_move] - Used to avoid printing duplicates
      */
     make_vnode_line(move, last_move) {
         if (!move || move == undefined) {
@@ -299,28 +305,59 @@ class MovesList {
 /**
  * How we internally store a move that will be displayed in the pgn viewer.
  * color is inferred from halfmove: halfmove % 2 == 0 ---> black
- * @typedef Move
- * @property {String} id - Unique move identifier
- * @property {String} fen - How the board looks after making this move
- * @property {String} san - human readable format
- * @property {Number} halfmove - starting from 1 according to standards
- * @property {String[]} ravs - variations stemming from this position
- * @property {Boolean} is_first_move_in_rav - Used to display ...
- * @property {String} previous_move - id for the previous move
- * @property {String} comment_after_move - Text commentary
  */
 class Move {
     constructor(param) {
-        this.id = param.san + ' - ' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+        /**
+         * @property {String} id - Unique move identifier
+         */
+        this.id = param.san + ' - ' + (param.fen || Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15))
+
+        /**
+         * @property {String} fen - How the board looks after making this move
+         */
         this.fen = param.fen
+
+        /**
+         * @property {String} san - human readable format
+         */
         this.san = param.san
+
+        /**
+         * @property {String} previous_move - id for the previous move
+         */
         this.previous_move = null
+
+        /**
+         * @property {Move|null}
+         */
         this.next_move = null
+
+        /**
+         * @property {String[]} ravs - variations stemming from this position
+         */
         this.ravs = []
-        this.half_move = param.half_move || 0
+
+        /**
+         * @property {Number} halfmove - starting from 1 according to standards
+         */
+        this.half_move = param.half_move || (this.fen.split(' ')[5] * 2)
+
+        /**
+         * @property {Boolean} is_first_move_in_rav - Used to display ...
+         */
         this.is_first_move_in_rav = false
+
+        /**
+         * @property {Boolean}
+         */
         this.is_white_move = param.fen.split(' ')[ 1 ] == 'b' // because the fen is after the move was played
+
+        /**
+         * @property {String} comment_after_move - Text commentary
+         */
         this.comment_after_move = ''
+
         this.clk = '' // "remaining time to next time control" i.e. time left
     }
     /**
