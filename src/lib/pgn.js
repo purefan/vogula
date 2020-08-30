@@ -168,6 +168,7 @@ class MovesList {
 [Annotator "https://lichess.org/@/purefan"]
 
 1. e4 { [%clk 0:30:00] } c5 { [%clk 0:30:00] } 2. Nf3 { [%clk 0:30:10] } e6 { [%clk 0:30:23] }
+3. c4 { (0.2 -> 0.1) }
 
      */
     import_pgn(full_pgn) {
@@ -179,19 +180,30 @@ class MovesList {
         if (this.moves_count < 1) {
             headers.set_headers(game_parts.headers)
         }
-
+        // This is needed because there may be a comment about a valid move
+        let comment_level = 0
+        console.log('move parts', game_parts.moves)
         for (move in game_parts.moves) {
             next_move = this.moves[ this.current_move() ].next_move
             san_to_import = game_parts.moves[ move ]
+            console.log('san to import', san_to_import)
+            // Entering comment
+            if (san_to_import.includes('{')) {
+                comment_level++
+            }
+            if (san_to_import.includes('}')) {
+                comment_level--
+            }
+
             // Entering RAV
-            if (san_to_import.includes('(')) {
+            if (comment_level == 0 && san_to_import.includes('(')) {
                 this.move_backward()
                 chess.load(this.moves[ this.current_move() ].fen)
                 continue
             }
 
             // Exiting RAV
-            if (san_to_import.includes(')')) {
+            if (comment_level == 0 && san_to_import.includes(')')) {
                 const start = this.find_start_of_rav()
                 const next_move_from_start = this.moves[ start.previous_move ].next_move
                 this.current_move(next_move_from_start)
@@ -200,7 +212,7 @@ class MovesList {
             }
 
             const chess_move = chess.move(san_to_import)
-            if (!chess_move) {
+            if (!chess_move || comment_level > 0) {
                 console.error(`Importing an invalid move: "${san_to_import}"`)
                 this.moves[ this.current_move() ].comment_after_move += ` ${san_to_import} `
                 continue
@@ -245,8 +257,8 @@ class MovesList {
                 .replace(/\r?\n|\r/g, ' ')
                 .replace(/\s\s+/g, ' ') // not perfect but 70% of the time works every time
                 .replace(/[\d]+[\.]{1,3}\s(\w)/g, '$1') // Remove space after move number 4. d3 --> 4.d3
-                .replace(/\(/, ' ( ') // add a space so we can easily tell when a variation starts
-                .replace(/\)/, ' ) ') // and ends in the for loop
+                .replace(/\(/g, ' ( ') // add a space so we can easily tell when a variation starts
+                .replace(/\)/g, ' ) ') // and ends in the for loop
                 .replace(/[\d]+\./g, '') // remove numbers
                 .split(' ')
                 .map(san => san.replace(/\s/g, ''))
