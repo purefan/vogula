@@ -10,7 +10,7 @@ class Position {
         /**
          * @property {Analysis[]} analysis
          */
-        this.analysis = param.analysis.map(analysis => new Analysis(Object.assign({ fen: param._id }, analysis)))
+        this.analysis = (param.analysis || []).map(analysis => new Analysis(Object.assign({ fen: param._id }, analysis)))
 
         /**
          * @property {String} id
