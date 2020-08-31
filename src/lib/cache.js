@@ -7,6 +7,8 @@
 
 /**
  * Manages cache objects which m
+ * 1596918379
+ * 1596918465
  */
 class cache_manager {
     constructor(param) {
@@ -16,7 +18,9 @@ class cache_manager {
     }
 
     get(name) {
-        if (!this.cache_items[ name ] || !this.cache_items[ name ].value || !this.cache_items[ name ].ttl) {
+        if (!this.cache_items[ name ] ||
+                !this.cache_items[ name ].value || this.cache_items[ name ] == null ||
+                !this.cache_items[ name ].ttl || this.cache_items[ name ].ttl == null) {
             console.log(`[Cache:get(${name})] Doesnt exist`)
             this.expire(name)
             return null
@@ -35,7 +39,7 @@ class cache_manager {
             return null
         }
 
-        console.log(`[Cache:get(${name})] Found in cache`, this.cache_items[ name ].value)
+        console.log(`[Cache:get(${name})] Found in cache`, this.cache_items[ name ])
         return this.cache_items[ name ].value
     }
 
@@ -58,6 +62,9 @@ class cache_manager {
      */
     set(param) {
         console.log(`[Cache:set] ${param.name}`)
+        if (!param.ttl) {
+            throw new Error('Must have ttl for cache')
+        }
         this.cache_items[ param.name ] = new cache_item(param)
         this.save()
     }
@@ -79,12 +86,18 @@ class cache_manager {
 
 }
 
+function millisToMinutesAndSeconds(millis) {
+    var minutes = Math.floor(millis / 60000);
+    var seconds = ((millis % 60000) / 1000).toFixed(0);
+    return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
+  }
+
 class cache_item {
     constructor(param) {
         this.created_at = Date.now()
-        this.key = param.key
         this.value = param.value
         this.ttl = param.ttl
+        this.valid_for = millisToMinutesAndSeconds(param.ttl - this.created_at)
     }
 
     get() {

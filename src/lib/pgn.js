@@ -183,7 +183,7 @@ class MovesList {
         // This is needed because there may be a comment about a valid move
         let comment_level = 0
         console.log('move parts', game_parts.moves)
-        for (move in game_parts.moves) {
+        for (let move in game_parts.moves) {
             next_move = this.moves[ this.current_move() ].next_move
             san_to_import = game_parts.moves[ move ]
             console.log('san to import', san_to_import)
@@ -290,7 +290,6 @@ class MovesList {
 
         // Append this move: e.g: 1.d4
         if (move.san && (!last_move || move.id != last_move.id)) {
-            console.log('[PGN::make_vnode_line] list.push because move.san')
             list.push(move.make_vnode({ current_move: this.current_move() }))
         }
 
@@ -301,12 +300,10 @@ class MovesList {
 
         // If there are variations to 1...Nf6, add them
         if (move.ravs.length > 0) {
-            console.log('[PGN::make_vnode_line] RAVing')
             move.ravs.map(rav => list.push(m('div.rav.tree-branch', [ m('span', '('), this.make_vnode_line(this.moves[ rav ]), m('span', ')') ])))
         }
 
         if (move.next_move) {
-            console.log('[PGN::make_vnode_line] move.next_move', move.next_move)
             list = list.concat(this.make_vnode_line(this.moves[ move.next_move ], this.moves[ move.next_move ]))
         }
 

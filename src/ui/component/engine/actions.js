@@ -39,6 +39,7 @@ function set_analysis(result) {
 * When pressed adds the current position to the resker queue
 * @param {object} param
 * @param {Number} [param.depth_goal=40]
+* @param {Number} [param.multipv_goal=5]
 * @param {Number} [param.priority=5]
 * @param {String} [param.fen] - Defaults to the current fen
 */
@@ -50,6 +51,7 @@ async function add_to_resker_queue(param) {
     const body_params = {
         fen: param.fen || pgn_moves.move_list.current_fen,
         depth_goal: param.depth_goal || 40,
+        multipv_goal: param.multipv_goal || 5,
         priority: param.priority || 5
     }
 
@@ -132,15 +134,29 @@ async function fetch_position_from_resker(fen) {
 
 }
 
+
+/**
+ *
+ * @param {Object} param
+ * @param {String} param.fen
+ * @returns {Number} The calculated depth_goal
+ */
+function calculate_priotiy(param) {
+    if (localStorage.getItem('settings.engine.resker.smart_prio.enabled') == 'true') {
+        return 38 - parseInt(param.fen.split(' ')[ 5 ]) // 1st move = 37 = median length
+    }
+    return parseInt(localStorage.getItem('settings.engine.resker.auto_depth_goal')) || 10
+}
+
 async function queue_position_on_resker(fen) {
     assert_valid_key()
     EngineActions.status('Adding to resker')
     console.log('[Engine:queue_position_on_resker] queueing')
     await add_to_resker_queue({
         fen,
-        depth_goal: parseInt(localStorage.getItem('settings.engine.resker.auto_depth_goal')) || 30,
-        multipv_goal: parseInt(localStorage.getItem('settings.engine.resker.auto_multipv_goal')) || 4,
-        priority: 1
+        depth_goal: 40,
+        multipv_goal: parseInt(localStorage.getItem('settings.engine.resker.auto_multipv_goal')) || 5,
+        priority: calculate_priotiy({fen})
     })
 }
 
