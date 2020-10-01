@@ -103,13 +103,13 @@ function is_promote(param) {
 }
 
 Board.make_dests = chess => {
-    const dests = {}
+    const dests = new Map()
     chess.SQUARES.forEach(function (s) {
         const ms = chess.moves({
             square: s,
             verbose: true
         })
-        if (ms.length) dests[ s ] = ms.map(m => m.to)
+        if (ms.length) dests.set(s, ms.map(m => m.to))
     })
     return dests
 }
@@ -117,8 +117,7 @@ Board.make_dests = chess => {
 Board.oncreate = vnode => {
     Board.vnode = vnode.dom
     Board.config.movable.dests = Board.make_dests(Board.chessjs)
-    window.chessground = Board.chessground = Chessground(vnode.dom, Board.config)
-
+    Board.chessground = Chessground(vnode.dom, Board.config)
 
     Board.vnode.addEventListener('Board.ready', Board.process_queue_after_move)
 }
