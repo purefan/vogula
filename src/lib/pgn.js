@@ -3,7 +3,7 @@ const stream = require('mithril/stream')
 const chessjs = require('chess.js')
 const headers = require('../ui/component/pgn/headers')
 
-class MovesList {
+export class MovesList {
     constructor() {
         this.reset()
     }
@@ -38,7 +38,7 @@ class MovesList {
             throw new Error('1. Duplicating move')
         }
         if (this.current_move() && this.moves[ this.current_move() ].previous_move == move.id) {
-            throw new Error('2. Duplicating previous move', this.moves)
+            throw new Error('2. Duplicating previous move' + JSON.stringify(this.moves))
         }
         if (this.current_move() && this.moves[ this.current_move() ].next_move == move.id) {
             this.current_move(move.id)
@@ -69,6 +69,9 @@ class MovesList {
         }
     }
 
+    /**
+     * @returns {Number}
+     */
     count_half_moves_before() {
         let total = 1
         let current = this.current_move()
@@ -80,11 +83,17 @@ class MovesList {
         return total
     }
 
+    /**
+     * @returns {String}
+     */
     get current_fen() {
         console.log('[PGN::current_fen] ', this.moves[ this.current_move() ])
         return this.moves[ this.current_move() ].fen
     }
 
+    /**
+     * @returns {Move}
+     */
     get first_move() {
         while (this.move_backward());
         return this.moves[ this.current_move() ]
@@ -173,6 +182,7 @@ class MovesList {
      */
     import_pgn(full_pgn) {
         const game_parts = this.separate_pgn_parts(full_pgn)
+        // @ts-ignore
         const chess = new chessjs()
         this.first_move
         let next_move = null
@@ -315,7 +325,7 @@ class MovesList {
  * How we internally store a move that will be displayed in the pgn viewer.
  * color is inferred from halfmove: halfmove % 2 == 0 ---> black
  */
-class Move {
+export class Move {
     constructor(param) {
         /**
          * @property {String} id - Unique move identifier
@@ -423,9 +433,4 @@ class Move {
             }, `${move_number} ${this.san} ${this.comment_after_move ? this.comment_after_move : ''}`)
         ]
     }
-}
-
-module.exports = {
-    MovesList,
-    Move
 }

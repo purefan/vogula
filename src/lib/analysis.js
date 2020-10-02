@@ -227,6 +227,7 @@ class Step {
      * @returns {pgn.Move}
      */
     get moves() {
+        // @ts-ignore
         const validator = new Chess()
         validator.load(this.fen)
         return this.pv

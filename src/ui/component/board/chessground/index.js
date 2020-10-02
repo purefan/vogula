@@ -3,8 +3,11 @@ const m = require('mithril')
 const chessjs = require('chess.js')
 const moves = require('../../pgn/moves')
 const EngineActions = require('../../engine/actions')
+// @ts-ignore
 require('./chessground.scss')
+// @ts-ignore
 require('./theme.scss')
+// @ts-ignore
 require('./index.scss')
 
 /**
@@ -177,7 +180,8 @@ Board.sync = async () => {
 }
 
 
-window.chessjs = Board.chessjs = new chessjs()
+// @ts-ignore
+Board.chessjs = new chessjs()
 Board.chessjs.reset()
 
 module.exports = Board

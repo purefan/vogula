@@ -6,6 +6,7 @@ const chess = require('chess.js')
 const pgn = require('../../../../lib/pgn')
 const PositionAnalysed = require('../../../../lib/analysis')
 
+// @ts-ignore
 require('./index.scss')
 
 /**
