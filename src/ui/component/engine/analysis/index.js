@@ -29,7 +29,7 @@ const Engine = {
                     depth: step.depth,
                     score: step.score
                 }, [
-                    m('div.td', step.score),
+                    m('div.td', Number(step.score).toFixed(2)),
                     m('div.td', step.depth),
                     m('div.td', m('div.move_list', step.moves.map(move => move.make_vnode())))
                 ])
@@ -57,11 +57,12 @@ function prepare(result) {
     const best_analysis = result.get_deepest_analysis(result.analysis)
     const best_steps = result.get_best_steps(best_analysis)
     const unique_steps = result.remove_duplicated_first_pv(best_steps)
+
     unique_steps.sort((a, b) => {
-        if (a.fen.split(' ')[1] != 'w') {
-            return a.score - b.score
+        if (a.fen.split(' ')[1] != 'b') {
+            return b.score - a.score
         }
-        return b.score - a.score
+        return (b.score * -1) - (a.score * -1)
     })
     return unique_steps
 }

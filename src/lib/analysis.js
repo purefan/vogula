@@ -191,8 +191,8 @@ class Step {
         this.fen = param.fen
 
         /**
-         * @property {Object} score
-         * @property {Number} score.value
+         * @property {Object} score_object
+         * @property {Number} score_object.value
          */
         this.score_object = param.score
 
@@ -211,16 +211,14 @@ class Step {
          */
         this.time = param.time
 
-        /**
-         * @property {String} score
-         */
     }
 
     /**
-     * @returns {String}
+     * @returns {Number}
      */
     get score() {
-        return Number.parseFloat(this.score_object.value / 100).toFixed(2)
+        const floated = Number((this.score_object.value / 100).toFixed(2))
+        return this.fen.split(' ')[1] == 'b' ? (floated * -1) : floated
     }
 
     /**
