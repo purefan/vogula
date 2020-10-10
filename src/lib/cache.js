@@ -1,45 +1,42 @@
+const debug = require('debug')('vogula:lib:cache')
+
 /**
- * @typedef CacheItem
  * @description An object that stores cached values
  * @property {Number} ttl - Timestamp in seconds when this item is no longer valid
  * @property {String} value - The value that this item stores
- */
-
-/**
- * Manages cache objects which m
- * 1596918379
- * 1596918465
  */
 class cache_manager {
     constructor(param) {
         this.name = param.name
         this.cache_items = this.load() || {}
         this.max_items = 1000 // premature optimization?
+        this.log = debug.extend('manager')
     }
 
     get(name) {
+        const log = this.log.extend(`get(${name})`)
         if (!this.cache_items[ name ] ||
                 !this.cache_items[ name ].value || this.cache_items[ name ] == null ||
                 !this.cache_items[ name ].ttl || this.cache_items[ name ].ttl == null) {
-            console.log(`[Cache:get(${name})] Doesnt exist`)
+            log(`Doesnt exist`)
             this.expire(name)
             return null
         }
         const is_dead = this.cache_items[ name ].ttl - Date.now()
         if (is_dead < 0) {
-            console.log(`[Cache:get(${name})] is dead`)
+            log(`is dead ( ${this.cache_items[name].ttl} - ${Date.now()} = ${is_dead})`)
             this.expire(name)
             return null
         }
         const value = this.cache_items[ name ].value
         // Check that value has more than just "from_cache"
         if (Object.keys(value).filter(key => key != 'from_cache').length < 1) {
-            console.log('[Cache:get(${name})] is useless')
+            log('is useless')
             this.expire(name)
             return null
         }
 
-        console.log(`[Cache:get(${name})] Found in cache`, this.cache_items[ name ])
+        log(`Found in cache`, this.cache_items[ name ])
         return this.cache_items[ name ].value
     }
 
@@ -48,9 +45,11 @@ class cache_manager {
      * @param {String} name
      */
     expire(name) {
-        console.log(`Cache:expire] ${name}`)
+        const log = this.log.extend('expire')
+        log(`Expiring ${name}`)
         delete this.cache_items[ name ]
         this.save()
+        log('Done')
     }
 
     /**
@@ -61,7 +60,7 @@ class cache_manager {
      * @param {Date|Number} param.ttl - timestamp-able for when the value is no longer useful
      */
     set(param) {
-        console.log(`[Cache:set] ${param.name}`)
+        this.log(`[Cache:set] ${param.name}`)
         if (!param.ttl) {
             throw new Error('Must have ttl for cache')
         }
@@ -76,7 +75,6 @@ class cache_manager {
 
     /**
      * Loads and deserializes a localStorage key
-     * @param {String} name
      * @returns {Object}
      */
     load() {
@@ -88,8 +86,8 @@ class cache_manager {
 
 function millisToMinutesAndSeconds(millis) {
     var minutes = Math.floor(millis / 60000);
-    var seconds = ((millis % 60000) / 1000).toFixed(0);
-    return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
+    var seconds = ((millis % 60000) / 1000);
+    return minutes + ":" + (seconds < 10 ? '0' : '') + seconds.toFixed(0);
   }
 
 class cache_item {

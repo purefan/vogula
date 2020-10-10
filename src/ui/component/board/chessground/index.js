@@ -3,6 +3,7 @@ const m = require('mithril')
 const chessjs = require('chess.js')
 const moves = require('../../pgn/moves')
 const EngineActions = require('../../engine/actions')
+const debug = require('debug')('vogula:chessground')
 // @ts-ignore
 require('./chessground.scss')
 // @ts-ignore
@@ -63,7 +64,7 @@ Board.config = {
                 if (move.flags == 'e') {
                     Board.sync()
                 }
-                console.log('[chessground] chessjs move', move)
+                debug('chessjs move', move)
 
                 Board.chessground.set({
                     turnColor: Board.chessjs.turn() == 'b' ? 'black' : 'white',
@@ -131,7 +132,7 @@ Board.queue_after_move = []
  */
 Board.process_queue_after_move = async e => {
     e = e || {}
-    console.log('[Event:Board:process_queue_after_move]', e)
+    debug('process_queue_after_move', e)
 
     if (Board.is_processing_queue) { }
     EngineActions.fetch_analysis(Board.chessjs.fen())
@@ -174,7 +175,7 @@ Board.sync = async () => {
                     dests: Board.make_dests(Board.chessjs)
                 })
         })
-    console.log('[Board::sync] Fixed config', fixed_config)
+    debug('[Boardsync] Fixed config', fixed_config)
     Board.chessground.set(fixed_config)
     return new Promise(resolve => setTimeout(resolve, 200))
 }

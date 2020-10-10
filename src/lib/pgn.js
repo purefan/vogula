@@ -2,6 +2,7 @@ const m = require('mithril')
 const stream = require('mithril/stream')
 const chessjs = require('chess.js')
 const headers = require('../ui/component/pgn/headers')
+const debug = require('debug')('vogula:lib:pgn')
 
 export class MovesList {
     constructor() {
@@ -32,7 +33,8 @@ export class MovesList {
      * @param {Move} move
      */
     add_move(move) {
-        console.log('PGN::add_move(', move)
+        const log = debug.extend('add_move')
+        log('PGN::add_move(', move)
         if (move.id == this.current_move()) {
             console.error('1. Duplicating move',  this.moves)
             throw new Error('1. Duplicating move')
@@ -56,12 +58,12 @@ export class MovesList {
         this.moves[ move.id ] = move
         // is this a RAV?
         if (this.current_move() && this.moves[ this.current_move() ].next_move) {
-            console.log('[PGN::add_move] has next, rav-ing')
+            log('[PGN::add_move] has next, rav-ing')
             this.moves[ this.current_move() ].ravs.push(move.id)
             this.moves[ move.id ].is_first_move_in_rav = true
             this.current_move(move.id)
         } else {
-            console.log('[PGN::add_move] No next_move')
+            log('[PGN::add_move] No next_move')
             this.current_move(move.id)
             if (this.moves[ this.current_move() ].previous_move && !this.moves[ this.current_move() ].next_move) {
                 this.moves[ this.moves[ this.current_move() ].previous_move ].next_move = move.id
@@ -87,7 +89,8 @@ export class MovesList {
      * @returns {String}
      */
     get current_fen() {
-        console.log('[PGN::current_fen] ', this.moves[ this.current_move() ])
+        const log = debug.extend('current_fen')
+        log('[PGN::current_fen] ', this.moves[ this.current_move() ])
         return this.moves[ this.current_move() ].fen
     }
 
@@ -181,6 +184,7 @@ export class MovesList {
 
      */
     import_pgn(full_pgn) {
+        const log = debug.extend('import_pgn')
         const game_parts = this.separate_pgn_parts(full_pgn)
         // @ts-ignore
         const chess = new chessjs()
@@ -192,11 +196,11 @@ export class MovesList {
         }
         // This is needed because there may be a comment about a valid move
         let comment_level = 0
-        console.log('move parts', game_parts.moves)
+        log('move parts', game_parts.moves)
         for (let move in game_parts.moves) {
             next_move = this.moves[ this.current_move() ].next_move
             san_to_import = game_parts.moves[ move ]
-            console.log('san to import', san_to_import)
+            log('san to import', san_to_import)
             // Entering comment
             if (san_to_import.includes('{')) {
                 comment_level++
@@ -277,6 +281,8 @@ export class MovesList {
     }
 
     update_vnodes() {
+        const log = debug.extend('update_vnodes')
+        log('___ Update_vnodes___ 1')
         // find the first move
         let current_move = this.moves[ this.current_move() ]
         while (current_move.previous_move) {

@@ -1,16 +1,15 @@
 /**
  * All network requests happen here, anything triggered by the user happens here
  */
-const m = require('mithril')
 const stream = require('mithril/stream')
 const cache = require('../../../lib/cache')
 const queue = require('../../../lib/queue')
 const request = require('../../../lib/request')
 const PositionAnalysed = require('../../../lib/analysis')
-
+const debug = require('debug')('vogula:engine:actions')
 /**
  * @property {mithril/stream} status -
- * @property {mithril/stream} analysis - Used to display analysis from Resker
+ * @property {mithril/stream<PositionAnalysed>} analysis - Used to display analysis from Resker
  */
 const EngineActions = {
     status: stream('init'),
@@ -23,16 +22,24 @@ const EngineActions = {
     queue: new queue()
 }
 
+/**
+ *
+ * @param {*} [result]
+ * @returns {PositionAnalysed|null}
+ */
 function set_analysis(result) {
+    const log = debug.extend('set_analysis')
     if (!result || result == null || typeof result == undefined) {
-        console.log('[EngineActions] Requesting the value of the stream', EngineActions.analysis_stream())
-        return  EngineActions.analysis_stream()
+        log('[EngineActions] Requesting the value of the stream', EngineActions.analysis_stream())
+        return EngineActions.analysis_stream()
     }
     if (EngineActions.analysis_cache == result._id) {
-        return console.log('[EngineActions] Not duplicating')
+        log('[EngineActions] Not duplicating')
+        return null
     }
     EngineActions.analysis_cache = result._id
     EngineActions.analysis_stream(new PositionAnalysed(result))
+    log('done')
 }
 
 /**
@@ -57,7 +64,7 @@ async function add_to_resker_queue(param) {
 
     if (localStorage.getItem('settings.engine.resker.smart_prio.enabled') === 'true') {
         const fen_parts = body_params.fen.split(' ')
-        const calculated_priority = 38 - fen_parts[ 5 ] // 1st move = 37 = median length
+        const calculated_priority = 38 - Number(fen_parts[ 5 ]) // 1st move = 37 = median length
         body_params.priority = calculated_priority < 1 ? 1 : calculated_priority
     }
 

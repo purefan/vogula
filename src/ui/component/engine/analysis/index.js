@@ -1,9 +1,5 @@
 const m = require('mithril')
-const stream = require('mithril/stream')
 const EngineActions = require('../actions')
-const moves = require('../../pgn/moves')
-const chess = require('chess.js')
-const pgn = require('../../../../lib/pgn')
 const PositionAnalysed = require('../../../../lib/analysis')
 
 // @ts-ignore
