@@ -2,7 +2,6 @@ const m = require('mithril')
 const EngineActions = require('../actions')
 const PositionAnalysed = require('../../../../lib/analysis')
 
-// @ts-ignore
 require('./index.scss')
 
 /**

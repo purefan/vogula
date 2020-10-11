@@ -1,7 +1,6 @@
 const m = require('mithril')
 const PGN = require('../../../../lib/pgn')
 
-// @ts-ignore
 require('./index.scss')
 
 /**

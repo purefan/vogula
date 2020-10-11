@@ -1,6 +1,4 @@
 const m = require('mithril')
-const moves = require('../../pgn/moves')
-const analysis = require('../analysis') // should refactor the status out of the analysis
 const actions = require('../actions')
 const settings = require('./settings')
 const Toolbar = {
