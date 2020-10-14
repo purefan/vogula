@@ -1,6 +1,7 @@
 const m = require('mithril')
 const EngineActions = require('../actions')
 const PositionAnalysed = require('../../../../lib/analysis')
+const debug = require('debug')('vogula:engine:analysis')
 
 require('./index.scss')
 
@@ -44,7 +45,8 @@ const Engine = {
  * @returns {Array}
  */
 function prepare(result) {
-    console.log('[prepare]', result)
+    const log = debug.extend('prepare')
+    log('result', result)
     if (!result.analysis) {
         return []
     }
