@@ -52,6 +52,11 @@ export class MovesList {
             return
         }
 
+        // has this move already been added?
+        if (Object.prototype.hasOwnProperty.call(this.moves, move.id)){
+            return this.current_move(move.id)
+        }
+
         move.previous_move = this.current_move()
         this.half_move++
         move.half_move = this.count_half_moves_before()
@@ -177,7 +182,7 @@ export class MovesList {
 [Variant "Standard"]
 [ECO "B43"]
 [Opening "Sicilian Defense: Kan Variation, Knight Variation"]
-[Annotator "https://lichess.org/@/purefan"]
+[Annotator "https://lichess.org/<at-symbol>/purefan"]
 
 1. e4 { [%clk 0:30:00] } c5 { [%clk 0:30:00] } 2. Nf3 { [%clk 0:30:10] } e6 { [%clk 0:30:23] }
 3. c4 { (0.2 -> 0.1) }
@@ -283,10 +288,13 @@ export class MovesList {
     update_vnodes() {
         const log = debug.extend('update_vnodes')
         log('___ Update_vnodes___ 1')
+        let max_depth = Object.keys(this.moves).length
         // find the first move
         let current_move = this.moves[ this.current_move() ]
-        while (current_move.previous_move) {
+        while (current_move.previous_move && max_depth >= 0) {
+            log('___ update vnodes___ 2 - while', current_move.previous_move, max_depth)
             current_move = this.moves[ current_move.previous_move ]
+            max_depth--
         }
 
         let new_vnodes = this.make_vnode_line(current_move)

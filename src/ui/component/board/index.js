@@ -12,7 +12,7 @@ module.exports = {
                 } else {
                     toolbar.move_backwards()
                 }
-            })
+            }, {passive: true})
         }
     }
 }
