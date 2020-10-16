@@ -63,9 +63,7 @@ async function add_to_resker_queue(param) {
     }
 
     if (localStorage.getItem('settings.engine.resker.smart_prio.enabled') === 'true') {
-        const fen_parts = body_params.fen.split(' ')
-        const calculated_priority = 38 - Number(fen_parts[ 5 ]) // 1st move = 37 = median length
-        body_params.priority = calculated_priority < 1 ? 1 : calculated_priority
+        body_params.priority = calculate_priority({fen: param.fen}) //calculated_priority < 1 ? 1 : calculated_priority
     }
 
     return new Promise((resolve, reject) => {
@@ -143,16 +141,18 @@ async function fetch_position_from_resker(fen) {
 
 
 /**
- *
+ * Manually entered moves get a bonus in priority of 1000
+ * Large imports do not get a bonus at this point.
  * @param {Object} param
  * @param {String} param.fen
  * @returns {Number} The calculated depth_goal
  */
-function calculate_priotiy(param) {
+function calculate_priority(param) {
+    let priority = parseInt(localStorage.getItem('settings.engine.resker.auto_depth_goal')) || 10
     if (localStorage.getItem('settings.engine.resker.smart_prio.enabled') == 'true') {
-        return 38 - parseInt(param.fen.split(' ')[ 5 ]) // 1st move = 37 = median length
+        priority = 38 - parseInt(param.fen.split(' ')[ 5 ]) // 1st move = 37 = median length
     }
-    return parseInt(localStorage.getItem('settings.engine.resker.auto_depth_goal')) || 10
+    return priority + 1000
 }
 
 async function queue_position_on_resker(fen) {
@@ -163,7 +163,7 @@ async function queue_position_on_resker(fen) {
         fen,
         depth_goal: 40,
         multipv_goal: parseInt(localStorage.getItem('settings.engine.resker.auto_multipv_goal')) || 5,
-        priority: calculate_priotiy({fen})
+        priority: calculate_priority({fen})
     })
 }
 
