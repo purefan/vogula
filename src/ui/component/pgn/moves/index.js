@@ -1,5 +1,4 @@
 const m = require('mithril')
-const engine = require('../../engine/actions')
 const PGN = require('../../../../lib/pgn')
 
 require('./index.scss')
@@ -27,7 +26,7 @@ pgn_moves.view = () => m('div.move_list.tree-branch', pgn_moves.move_list.vnodes
 function current_move(id) {
     if (id) {
         pgn_moves.move_list.current_move(id)
-        pgn_moves.move_list.update_vnodes()
+        // pgn_moves.move_list.update_vnodes()
     } else {
         return pgn_moves.move_list.current_move()
     }
@@ -51,7 +50,7 @@ pgn_moves.make_move = param => {
 
     pgn_moves.move_list.add_move(move)
     pgn_moves.move_list.update_vnodes()
-    m.redraw()
+    // m.redraw()
 }
 
 function import_pgn(pgn) {

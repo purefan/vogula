@@ -1,30 +1,52 @@
 /**
  * All network requests happen here, anything triggered by the user happens here
  */
-const m = require('mithril')
 const stream = require('mithril/stream')
 const cache = require('../../../lib/cache')
 const queue = require('../../../lib/queue')
 const request = require('../../../lib/request')
-
+const PositionAnalysed = require('../../../lib/analysis')
+const debug = require('debug')('vogula:engine:actions')
 /**
  * @property {mithril/stream} status -
- * @property {mithril/stream} analysis - Used to display analysis from Resker
+ * @property {mithril/stream<PositionAnalysed>} analysis - Used to display analysis from Resker
  */
 const EngineActions = {
     status: stream('init'),
-    analysis: stream({}),
+    analysis_stream: stream({}),
+    analysis: set_analysis,
     add_to_resker_queue,
     fetch_analysis,
     xhr: null,
     cache: new cache({ name: 'resker.position' }),
     queue: new queue()
 }
-window.actions = EngineActions
+
+/**
+ *
+ * @param {*} [result]
+ * @returns {PositionAnalysed|null}
+ */
+function set_analysis(result) {
+    const log = debug.extend('set_analysis')
+    if (!result || result == null || typeof result == undefined) {
+        log('[EngineActions] Requesting the value of the stream', EngineActions.analysis_stream())
+        return EngineActions.analysis_stream()
+    }
+    if (EngineActions.analysis_cache == result._id) {
+        log('[EngineActions] Not duplicating')
+        return null
+    }
+    EngineActions.analysis_cache = result._id
+    EngineActions.analysis_stream(new PositionAnalysed(result))
+    log('done')
+}
 
 /**
 * When pressed adds the current position to the resker queue
+* @param {object} param
 * @param {Number} [param.depth_goal=40]
+* @param {Number} [param.multipv_goal=5]
 * @param {Number} [param.priority=5]
 * @param {String} [param.fen] - Defaults to the current fen
 */
@@ -36,13 +58,12 @@ async function add_to_resker_queue(param) {
     const body_params = {
         fen: param.fen || pgn_moves.move_list.current_fen,
         depth_goal: param.depth_goal || 40,
+        multipv_goal: param.multipv_goal || 5,
         priority: param.priority || 5
     }
 
     if (localStorage.getItem('settings.engine.resker.smart_prio.enabled') === 'true') {
-        const fen_parts = body_params.fen.split(' ')
-        const calculated_priority = 38 - fen_parts[ 5 ] // 1st move = 37 = median length
-        body_params.priority = calculated_priority < 1 ? 1 : calculated_priority
+        body_params.priority = calculate_priority({fen: param.fen}) //calculated_priority < 1 ? 1 : calculated_priority
     }
 
     return new Promise((resolve, reject) => {
@@ -118,15 +139,31 @@ async function fetch_position_from_resker(fen) {
 
 }
 
+
+/**
+ * Manually entered moves get a bonus in priority of 1000
+ * Large imports do not get a bonus at this point.
+ * @param {Object} param
+ * @param {String} param.fen
+ * @returns {Number} The calculated depth_goal
+ */
+function calculate_priority(param) {
+    let priority = parseInt(localStorage.getItem('settings.engine.resker.auto_depth_goal')) || 10
+    if (localStorage.getItem('settings.engine.resker.smart_prio.enabled') == 'true') {
+        priority = 38 - parseInt(param.fen.split(' ')[ 5 ]) // 1st move = 37 = median length
+    }
+    return priority + 1000
+}
+
 async function queue_position_on_resker(fen) {
     assert_valid_key()
     EngineActions.status('Adding to resker')
     console.log('[Engine:queue_position_on_resker] queueing')
     await add_to_resker_queue({
         fen,
-        depth_goal: parseInt(localStorage.getItem('settings.engine.resker.auto_depth_goal')) || 30,
-        multipv_goal: parseInt(localStorage.getItem('settings.engine.resker.auto_multipv_goal')) || 4,
-        priority: 1
+        depth_goal: 40,
+        multipv_goal: parseInt(localStorage.getItem('settings.engine.resker.auto_multipv_goal')) || 5,
+        priority: calculate_priority({fen})
     })
 }
 

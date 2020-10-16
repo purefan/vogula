@@ -2,8 +2,9 @@ const m = require('mithril')
 const stream = require('mithril/stream')
 const chessjs = require('chess.js')
 const headers = require('../ui/component/pgn/headers')
+const debug = require('debug')('vogula:lib:pgn')
 
-class MovesList {
+export class MovesList {
     constructor() {
         this.reset()
     }
@@ -32,12 +33,14 @@ class MovesList {
      * @param {Move} move
      */
     add_move(move) {
-        console.log('PGN::add_move(', move)
+        const log = debug.extend('add_move')
+        log('PGN::add_move(', move)
         if (move.id == this.current_move()) {
-            throw new Error('1. Duplicating move', this.moves)
+            console.error('1. Duplicating move',  this.moves)
+            throw new Error('1. Duplicating move')
         }
         if (this.current_move() && this.moves[ this.current_move() ].previous_move == move.id) {
-            throw new Error('2. Duplicating previous move', this.moves)
+            throw new Error('2. Duplicating previous move' + JSON.stringify(this.moves))
         }
         if (this.current_move() && this.moves[ this.current_move() ].next_move == move.id) {
             this.current_move(move.id)
@@ -49,18 +52,23 @@ class MovesList {
             return
         }
 
+        // has this move already been added?
+        if (Object.prototype.hasOwnProperty.call(this.moves, move.id)){
+            return this.current_move(move.id)
+        }
+
         move.previous_move = this.current_move()
         this.half_move++
         move.half_move = this.count_half_moves_before()
         this.moves[ move.id ] = move
         // is this a RAV?
         if (this.current_move() && this.moves[ this.current_move() ].next_move) {
-            console.log('[PGN::add_move] has next, rav-ing')
+            log('[PGN::add_move] has next, rav-ing')
             this.moves[ this.current_move() ].ravs.push(move.id)
             this.moves[ move.id ].is_first_move_in_rav = true
             this.current_move(move.id)
         } else {
-            console.log('[PGN::add_move] No next_move')
+            log('[PGN::add_move] No next_move')
             this.current_move(move.id)
             if (this.moves[ this.current_move() ].previous_move && !this.moves[ this.current_move() ].next_move) {
                 this.moves[ this.moves[ this.current_move() ].previous_move ].next_move = move.id
@@ -68,6 +76,9 @@ class MovesList {
         }
     }
 
+    /**
+     * @returns {Number}
+     */
     count_half_moves_before() {
         let total = 1
         let current = this.current_move()
@@ -79,11 +90,18 @@ class MovesList {
         return total
     }
 
+    /**
+     * @returns {String}
+     */
     get current_fen() {
-        console.log('[PGN::current_fen] ', this.moves[ this.current_move() ])
+        const log = debug.extend('current_fen')
+        log('[PGN::current_fen] ', this.moves[ this.current_move() ])
         return this.moves[ this.current_move() ].fen
     }
 
+    /**
+     * @returns {Move}
+     */
     get first_move() {
         while (this.move_backward());
         return this.moves[ this.current_move() ]
@@ -164,13 +182,16 @@ class MovesList {
 [Variant "Standard"]
 [ECO "B43"]
 [Opening "Sicilian Defense: Kan Variation, Knight Variation"]
-[Annotator "https://lichess.org/@/purefan"]
+[Annotator "https://lichess.org/<at-symbol>/purefan"]
 
 1. e4 { [%clk 0:30:00] } c5 { [%clk 0:30:00] } 2. Nf3 { [%clk 0:30:10] } e6 { [%clk 0:30:23] }
+3. c4 { (0.2 -> 0.1) }
 
      */
     import_pgn(full_pgn) {
+        const log = debug.extend('import_pgn')
         const game_parts = this.separate_pgn_parts(full_pgn)
+        // @ts-ignore
         const chess = new chessjs()
         this.first_move
         let next_move = null
@@ -178,19 +199,30 @@ class MovesList {
         if (this.moves_count < 1) {
             headers.set_headers(game_parts.headers)
         }
-
-        for (move in game_parts.moves) {
+        // This is needed because there may be a comment about a valid move
+        let comment_level = 0
+        log('move parts', game_parts.moves)
+        for (let move in game_parts.moves) {
             next_move = this.moves[ this.current_move() ].next_move
             san_to_import = game_parts.moves[ move ]
+            log('san to import', san_to_import)
+            // Entering comment
+            if (san_to_import.includes('{')) {
+                comment_level++
+            }
+            if (san_to_import.includes('}')) {
+                comment_level--
+            }
+
             // Entering RAV
-            if (san_to_import.includes('(')) {
+            if (comment_level == 0 && san_to_import.includes('(')) {
                 this.move_backward()
                 chess.load(this.moves[ this.current_move() ].fen)
                 continue
             }
 
             // Exiting RAV
-            if (san_to_import.includes(')')) {
+            if (comment_level == 0 && san_to_import.includes(')')) {
                 const start = this.find_start_of_rav()
                 const next_move_from_start = this.moves[ start.previous_move ].next_move
                 this.current_move(next_move_from_start)
@@ -199,7 +231,7 @@ class MovesList {
             }
 
             const chess_move = chess.move(san_to_import)
-            if (!chess_move) {
+            if (!chess_move || comment_level > 0) {
                 console.error(`Importing an invalid move: "${san_to_import}"`)
                 this.moves[ this.current_move() ].comment_after_move += ` ${san_to_import} `
                 continue
@@ -222,6 +254,11 @@ class MovesList {
         this.update_vnodes()
     }
 
+    /**
+     *
+     * @param {String} full_pgn
+     * @returns {Object}
+     */
     separate_pgn_parts(full_pgn) {
         const match = /([\[\w\W]*)\n\n([\w\W\s]*)/gm.exec(`\n\n${full_pgn}`)
         const headers = {}
@@ -239,8 +276,8 @@ class MovesList {
                 .replace(/\r?\n|\r/g, ' ')
                 .replace(/\s\s+/g, ' ') // not perfect but 70% of the time works every time
                 .replace(/[\d]+[\.]{1,3}\s(\w)/g, '$1') // Remove space after move number 4. d3 --> 4.d3
-                .replace(/\(/, ' ( ') // add a space so we can easily tell when a variation starts
-                .replace(/\)/, ' ) ') // and ends in the for loop
+                .replace(/\(/g, ' ( ') // add a space so we can easily tell when a variation starts
+                .replace(/\)/g, ' ) ') // and ends in the for loop
                 .replace(/[\d]+\./g, '') // remove numbers
                 .split(' ')
                 .map(san => san.replace(/\s/g, ''))
@@ -249,10 +286,15 @@ class MovesList {
     }
 
     update_vnodes() {
+        const log = debug.extend('update_vnodes')
+        log('___ Update_vnodes___ 1')
+        let max_depth = Object.keys(this.moves).length
         // find the first move
         let current_move = this.moves[ this.current_move() ]
-        while (current_move.previous_move) {
+        while (current_move.previous_move && max_depth >= 0) {
+            log('___ update vnodes___ 2 - while', current_move.previous_move, max_depth)
             current_move = this.moves[ current_move.previous_move ]
+            max_depth--
         }
 
         let new_vnodes = this.make_vnode_line(current_move)
@@ -262,7 +304,7 @@ class MovesList {
     /**
      *
      * @param {Move} move
-     * @param {Move} last_move - Used to avoid printing duplicates
+     * @param {Move} [last_move] - Used to avoid printing duplicates
      */
     make_vnode_line(move, last_move) {
         if (!move || move == undefined) {
@@ -272,7 +314,6 @@ class MovesList {
 
         // Append this move: e.g: 1.d4
         if (move.san && (!last_move || move.id != last_move.id)) {
-            console.log('[PGN::make_vnode_line] list.push because move.san')
             list.push(move.make_vnode({ current_move: this.current_move() }))
         }
 
@@ -283,12 +324,10 @@ class MovesList {
 
         // If there are variations to 1...Nf6, add them
         if (move.ravs.length > 0) {
-            console.log('[PGN::make_vnode_line] RAVing')
             move.ravs.map(rav => list.push(m('div.rav.tree-branch', [ m('span', '('), this.make_vnode_line(this.moves[ rav ]), m('span', ')') ])))
         }
 
         if (move.next_move) {
-            console.log('[PGN::make_vnode_line] move.next_move', move.next_move)
             list = list.concat(this.make_vnode_line(this.moves[ move.next_move ], this.moves[ move.next_move ]))
         }
 
@@ -299,28 +338,59 @@ class MovesList {
 /**
  * How we internally store a move that will be displayed in the pgn viewer.
  * color is inferred from halfmove: halfmove % 2 == 0 ---> black
- * @typedef Move
- * @property {String} id - Unique move identifier
- * @property {String} fen - How the board looks after making this move
- * @property {String} san - human readable format
- * @property {Number} halfmove - starting from 1 according to standards
- * @property {String[]} ravs - variations stemming from this position
- * @property {Boolean} is_first_move_in_rav - Used to display ...
- * @property {String} previous_move - id for the previous move
- * @property {String} comment_after_move - Text commentary
  */
-class Move {
+export class Move {
     constructor(param) {
-        this.id = param.san + ' - ' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+        /**
+         * @property {String} id - Unique move identifier
+         */
+        this.id = param.san + ' - ' + (param.fen || Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15))
+
+        /**
+         * @property {String} fen - How the board looks after making this move
+         */
         this.fen = param.fen
+
+        /**
+         * @property {String} san - human readable format
+         */
         this.san = param.san
+
+        /**
+         * @property {String} previous_move - id for the previous move
+         */
         this.previous_move = null
+
+        /**
+         * @property {Move|null}
+         */
         this.next_move = null
+
+        /**
+         * @property {String[]} ravs - variations stemming from this position
+         */
         this.ravs = []
-        this.half_move = param.half_move || 0
+
+        /**
+         * @property {Number} halfmove - starting from 1 according to standards
+         */
+        this.half_move = param.half_move || (this.fen.split(' ')[5] * 2)
+
+        /**
+         * @property {Boolean} is_first_move_in_rav - Used to display ...
+         */
         this.is_first_move_in_rav = false
+
+        /**
+         * @property {Boolean}
+         */
         this.is_white_move = param.fen.split(' ')[ 1 ] == 'b' // because the fen is after the move was played
+
+        /**
+         * @property {String} comment_after_move - Text commentary
+         */
         this.comment_after_move = ''
+
         this.clk = '' // "remaining time to next time control" i.e. time left
     }
     /**
@@ -377,9 +447,4 @@ class Move {
             }, `${move_number} ${this.san} ${this.comment_after_move ? this.comment_after_move : ''}`)
         ]
     }
-}
-
-module.exports = {
-    MovesList,
-    Move
 }

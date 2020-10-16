@@ -1,12 +1,14 @@
 const m = require('mithril')
 const board = require('../chessground') // for state
 const moves = require('../../pgn/moves')
+const debug = require('debug')('vogula:board:promote')
 
 require('./index.scss')
 const promote = {
     oninit: () => {
         promote.is_hidden = true
-        console.log('promote:oninit board', board)
+        const log = debug.extend('oninit')
+        log('board', board)
     },
     view: () => m('div', {
         class: 'overlay' + (promote.is_hidden ? ' hidden' : '')

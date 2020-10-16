@@ -1,6 +1,4 @@
 const m = require('mithril')
-const stream = require('mithril/stream')
-const Engine = require('../analysis')
 const Actions = require('../actions')
 const Status = {
 

@@ -1,6 +1,7 @@
 const m = require('mithril')
 const Board = require('../chessground')
 const Moves = require('../../pgn/moves')
+
 require('./index.scss')
 const toolbar = {
     move_forwards,

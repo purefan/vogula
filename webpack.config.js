@@ -15,8 +15,7 @@ module.exports = {
             filename: '[name].css',
             chunkFilename: '[id].css',
             ignoreOrder: false, // Enable to remove warnings about conflicting order
-        }),
-        new webpack.DefinePlugin({ CONFIG: JSON.stringify(require('config')) })
+        })
         , new HtmlWebpackPlugin({
             title: 'Vogula Chess',
             meta: {
