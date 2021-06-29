@@ -129,6 +129,10 @@ async function fetch_position_from_resker(fen) {
         }).then(res => {
             EngineActions.xhr = null
             console.log('[Engine::fetch_position_from_resker] Fetched:', res)
+            // @TODO Fix in everywhere here:
+            if (!res._id && res.fen) {
+                res._id = res.fen
+            }
             resolve(res)
         }).catch(err => {
             console.log('error', err)
@@ -155,6 +159,9 @@ function calculate_priority(param) {
     return priority + 1000
 }
 
+/**
+ *
+ */
 async function queue_position_on_resker(fen) {
     assert_valid_key()
     EngineActions.status('Adding to resker')

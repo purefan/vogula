@@ -65,6 +65,7 @@ $toolbar-height: 5vh;
     grid-template-rows: 5vh 20vh 2vh;
     grid-template-areas: "engine-container-toolbar""engine-container-analysis""engine-container-status";
     grid-area: engine-container;
+    border-bottom: 1px solid #999;;
 }
 
 .engine-container-toolbar {
@@ -87,6 +88,7 @@ $toolbar-height: 5vh;
     grid-template-areas: "db-container-toolbar""db-container-data""db-container-status";
     grid-area: db-container;
     height: 70vh;
+    padding-top: 1vh;
     /* engine-container is 27vh*/
 }
 

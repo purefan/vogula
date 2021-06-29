@@ -8,6 +8,7 @@
     "url": "https://github.com/purefan/vogula"
   },
   "scripts": {
+    "gui": "electron .",
     "test": "mocha",
     "build": "$(npm bin)/webpack --watch"
   },
@@ -18,7 +19,8 @@
     "chessground": "7.9.3",
     "debug": "4.1.1",
     "electron-mocha": "8.1.2",
-    "g": "2.0.1"
+    "g": "2.0.1",
+    "webpack-cli": "^4.5.0"
   },
   "devDependencies": {
     "@babel/core": "^7.7.7",
