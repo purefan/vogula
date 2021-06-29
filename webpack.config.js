@@ -25,6 +25,7 @@ module.exports = {
         , new CspHtmlWebpackPlugin({
             'script-src': [ "'unsafe-inline'", "'self'" ]
         })
+        ,  new webpack.ProvidePlugin({m: "mithril"})
     ],
     module: {
         rules: [

@@ -1,21 +1,29 @@
 const Chess = require('chess.js')
 const pgn = require('./pgn')
-
+const debug = require('debug')('vogula:lib:analysis')
 class Position {
     /**
      *
      * @param {Object} param
+     * @param {Array} param.analysis
      */
     constructor(param) {
+        if (!Array.isArray(param.analysis)) {
+            param.analysis = [ param.analysis ]
+        }
+        debug('constructor param', param)
+
         /**
          * @property {Analysis[]} analysis
          */
-        this.analysis = (param.analysis || []).map(analysis => new Analysis(Object.assign({ fen: param._id }, analysis)))
+        this.analysis = (param.analysis || []).filter(analysis => typeof analysis != 'undefined').map(analysis => new Analysis(Object.assign({ fen: param._id }, analysis)))
 
         /**
          * @property {String} id
          */
         this.id = param._id
+
+        this.fen = param.fen || param._id
 
         this.client = param.client
 
@@ -218,7 +226,7 @@ class Step {
      */
     get score() {
         const floated = Number((this.score_object.value / 100).toFixed(2))
-        return this.fen.split(' ')[1] == 'b' ? (floated * -1) : floated
+        return this.fen.split(' ')[ 1 ] == 'b' ? (floated * -1) : floated
     }
 
     /**

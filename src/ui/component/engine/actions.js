@@ -63,7 +63,7 @@ async function add_to_resker_queue(param) {
     }
 
     if (localStorage.getItem('settings.engine.resker.smart_prio.enabled') === 'true') {
-        body_params.priority = calculate_priority({fen: param.fen}) //calculated_priority < 1 ? 1 : calculated_priority
+        body_params.priority = calculate_priority({ fen: body_params.fen })
     }
 
     return new Promise((resolve, reject) => {
@@ -160,10 +160,9 @@ async function queue_position_on_resker(fen) {
     EngineActions.status('Adding to resker')
     console.log('[Engine:queue_position_on_resker] queueing')
     await add_to_resker_queue({
-        fen,
         depth_goal: 40,
         multipv_goal: parseInt(localStorage.getItem('settings.engine.resker.auto_multipv_goal')) || 5,
-        priority: calculate_priority({fen})
+        priority: calculate_priority({ fen })
     })
 }
 
