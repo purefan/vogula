@@ -1,0 +1,52 @@
+.pgn-container-headers {
+    .header-group {
+        text-align: center;
+
+        &[data-group_name="event"] {
+            .event {
+                font-size: 120%;
+            }
+
+            .site {
+                &::before {
+                    content: ' (';
+                }
+
+                &::after {
+                    content: ')';
+                }
+            }
+        }
+
+        &[data-group_name="game"] {
+            .result {
+                &::before {
+                    content: ' ';
+                }
+
+                &::after {
+                    content: ' ';
+                }
+            }
+        }
+
+        &[data-group_name="time"] {
+            .round {
+                &::before {
+                    content: '(';
+                }
+
+                &::after {
+                    content: ') ';
+                }
+            }
+        }
+
+        &[data-group_name="clock"] {
+            span {
+                margin-left: 6px;
+                margin-right: 6px;
+            }
+        }
+    }
+}

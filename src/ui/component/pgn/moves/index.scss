@@ -1,0 +1,41 @@
+$text-color: #999;
+
+div.move_list {
+    color: #999;
+    clear: both;
+    max-height: 80vh;
+
+    position: relative;
+    padding-left: 6px;
+    padding-bottom: 2px;
+    overflow-wrap: anywhere;
+    max-width: 24vw;
+
+    span.move {
+        text-align: center;
+        cursor: pointer;
+        white-space: nowrap;
+        display: inline-block;
+        margin-left: 6px;
+    }
+
+    .current_move {
+        border-bottom: 1px solid $text-color;
+    }
+
+    .rav {
+        margin: 5px 0 5px 15px;
+        position: relative;
+
+        span:nth-last-child(2) {
+            margin-right: 0;
+        }
+    }
+}
+
+div.pgn-container-moves {
+    max-height: 75vh;
+    div.move_list {
+        overflow-y: auto;
+    }
+}

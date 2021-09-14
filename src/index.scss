@@ -1,0 +1,234 @@
+$text-color: #999;
+$pgn-container-width: 25vw;
+
+body {
+    background: #222;
+    color: $text-color;
+    height: 100vh;
+    margin: 0;
+    padding: 0
+}
+
+$toolbar-height: 5vh;
+
+/** https://grid.layoutit.com/?id=Iz9Bjqu **/
+.grid-container {
+    display: grid;
+    height: 100vh;
+    grid-template-columns: 50vw $pgn-container-width 24vw;
+    grid-template-rows: 1fr 1fr;
+    grid-template-areas: "board-container pgn-container engine-container""board-container pgn-container db-container";
+}
+
+.board-container {
+    display: grid;
+    grid-template-columns: 50vw;
+    grid-template-rows: 90vh;
+    grid-template-areas: "board-container-chessground""board-container-toolbar";
+    grid-area: board-container;
+}
+
+.board-container-chessground {
+    grid-area: board-container-chessground;
+}
+
+.board-container-toolbar {
+    grid-area: board-container-toolbar;
+}
+
+.pgn-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: $toolbar-height calc(#{$toolbar-height} * 2) 1fr;
+    grid-template-areas: "pgn-container-toolbar""pgn-container-headers""pgn-container-moves";
+    grid-area: pgn-container;
+    padding-right: 4vw;
+}
+
+.pgn-container-toolbar {
+    grid-area: pgn-container-toolbar;
+}
+
+.pgn-container-headers {
+    grid-area: pgn-container-headers;
+}
+
+.pgn-container-moves {
+    grid-area: pgn-container-moves;
+    width: $pgn-container-width;
+    overflow-wrap: break-word;
+}
+
+.engine-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 5vh 20vh 2vh;
+    grid-template-areas: "engine-container-toolbar""engine-container-analysis""engine-container-status";
+    grid-area: engine-container;
+    border-bottom: 1px solid #999;;
+}
+
+.engine-container-toolbar {
+    grid-area: engine-container-toolbar;
+}
+
+.engine-container-status {
+    grid-area: engine-container-status;
+}
+
+.engine-container-analysis {
+    grid-area: engine-container-analysis;
+    overflow: auto;
+}
+
+.db-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: $toolbar-height 1fr 1fr;
+    grid-template-areas: "db-container-toolbar""db-container-data""db-container-status";
+    grid-area: db-container;
+    height: 70vh;
+    padding-top: 1vh;
+    /* engine-container is 27vh*/
+}
+
+.db-container-toolbar {
+    grid-area: db-container-toolbar;
+}
+
+.db-container-data {
+    grid-area: db-container-data;
+}
+
+.db-container-status {
+    grid-area: db-container-status;
+}
+
+.hidden {
+    visibility: hidden;
+    opacity: 0;
+}
+
+.visible {
+    visibility: visible;
+    opacity: 1;
+}
+
+input[type=text].error {
+    border: 2px solid red;
+}
+
+/** Table */
+.table {
+    display: table;
+}
+
+.tr {
+    display: table-row;
+}
+
+.td {
+    display: table-cell;
+}
+
+.toolbar-container {
+    text-align: center;
+}
+
+/** Tree view **/
+.tree-branch {
+    &::before {
+        content: "";
+        position: absolute;
+        top: -7px;
+        left: -20px;
+        border-left: 1px solid $text-color;
+        border-bottom: 1px solid $text-color;
+        border-radius: 0 0 0 0px;
+        width: 20px;
+        height: 15px;
+    }
+
+    &:last-child::after {
+        display: none;
+    }
+
+    &:not(:last-child)::after {
+        position: absolute;
+        content: "";
+        top: 8px;
+        left: -20px;
+        border-left: 1px solid $text-color;
+        border-top: 1px solid $text-color;
+        border-radius: 0px 0 0 0;
+        width: 20px;
+        height: 100%;
+    }
+}
+
+/************* Modal ****************/
+$modal-content-width: 40vw;
+
+.modal {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    transition: opacity 500ms;
+}
+
+.modal-content {
+    z-index: 10;
+    margin: 70px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 5px;
+    width: $modal-content-width;
+    position: relative;
+    transition: all 5s ease-in-out;
+}
+
+/*********** On off switch ***********/
+input.onoff[type=checkbox] {
+    height: 0;
+    width: 0;
+    visibility: hidden;
+}
+
+label.onoff {
+    cursor: pointer;
+    text-indent: -9999px;
+    width: 50px;
+    height: 25px;
+    background: grey;
+    display: block;
+    border-radius: 25px;
+    position: relative;
+}
+
+label.onoff:after {
+    content: '';
+    position: absolute;
+    top: 1.7px;
+    left: 1.7px;
+    width: 22.5px;
+    height: 22.5px;
+    background: #fff;
+    border-radius: 22.5px;
+    transition: 0.3s;
+}
+
+input.onoff:checked+label {
+    background: #bada55;
+}
+
+input.onoff:checked+label:after {
+    left: calc(100% - 2.5px);
+    transform: translateX(-100%);
+}
+
+label.onoff:active:after {
+    width: 32.5px;
+}
