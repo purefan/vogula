@@ -56,7 +56,6 @@ function set_analysis(result) {
 * @param {String} [param.fen] - Defaults to the current fen
 */
 async function add_to_resker_queue(param) {
-
     param = Object.assign({}, { depth_goal: 40, priority: 10 }, param)
     assert_valid_key()
     EngineActions.status('Queuing')

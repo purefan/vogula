@@ -1,8 +1,9 @@
 import board from '../chessground' // for state
 import moves from '../../pgn/moves'
-import debug from 'debug'
-
 import './index.scss'
+import Debug from 'debug'
+const debug = Debug('ui:board:promote')
+
 const promote = {
     oninit: () => {
         promote.is_hidden = true

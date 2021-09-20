@@ -2,8 +2,10 @@ import { Chessground } from 'chessground'
 import chessjs from 'chess.js'
 import moves from '../../pgn/moves/index.js'
 import EngineActions from '../../engine/actions.js'
+import promote from '../promote'
 import Debug from 'debug'
 const debug = Debug('chessground')
+
 // @ts-ignore
 import './chessground.scss'
 // @ts-ignore
@@ -48,7 +50,6 @@ Board.config = {
                 }
                 if (is_promote({ src, dest })) {
                     // Updating the visual list of moves happens in promote
-                    const promote = require('../promote')
                     promote.is_hidden = false
                     m.redraw()
                     return true

@@ -9,7 +9,6 @@ import Debug from 'debug'
 const debug = Debug('lib/request')
 
 /**
- * http://192.168.1.42:8002
  * @todo When a modal is active pressing left or right should not move the pieces on the board
  * @param {Object} param
  * @param {String} param.method
