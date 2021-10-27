@@ -21,6 +21,14 @@
         }
     }
 
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content:target, .tab-content-active {
+        display: block;
+    }
+
 }
 
 div.td .scroll-vertical {

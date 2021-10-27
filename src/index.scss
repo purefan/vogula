@@ -177,6 +177,8 @@ $modal-content-width: 40vw;
     right: 0;
     background: rgba(0, 0, 0, 0.7);
     transition: opacity 500ms;
+    z-index: 1;
+    width: 100vw;
 }
 
 .modal-content {
@@ -185,9 +187,16 @@ $modal-content-width: 40vw;
     padding: 20px;
     background: #fff;
     border-radius: 5px;
-    width: $modal-content-width;
+    min-width: $modal-content-width;
     position: relative;
     transition: all 5s ease-in-out;
+    padding-top: 6vh;
+}
+
+button.close-modal {
+    position:absolute;
+    right: 1vw;
+    top: 1vh;
 }
 
 /*********** On off switch ***********/
