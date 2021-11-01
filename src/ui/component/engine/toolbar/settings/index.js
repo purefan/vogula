@@ -1,7 +1,7 @@
 import TabManager from '../../../../../lib/tab'
 import Config from './config'
 import Stats from './stats'
-
+import Modal from '../../../../../lib/modal'
 import './index.scss'
 
 const Settings = {
@@ -13,7 +13,7 @@ const Settings = {
     },
     view: () => m(
         'div',
-        { class: `modal ${Settings.state}` },
+        { class: `engine_modal modal ${Settings.state}` },
         m('div.modal-content', [
             m('button.close-modal', { onclick: e => Settings.state = 'hidden' }, 'Close'),
             m(TabManager)
