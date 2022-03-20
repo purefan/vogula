@@ -1,8 +1,9 @@
 import board from '../component/board/index.js'
 import pgn from '../component/pgn'
 import engine from '../component/engine'
-import modal from '../../lib/modal'
+// import modal from '../../lib/modal'
 import promote from '../component/board/promote'
+import db from '../component/db/index'
 
 const Base = {
   view: () =>
@@ -23,11 +24,10 @@ const Base = {
         m('div.engine-container-status', m(engine.status))
       ]),
       m('div.db-container', [
-        m('div.db-container-toolbar.toolbar-container', 'db-toolbar'),
+        m('div.db-container-toolbar.toolbar-container', m(db.toolbar)),
         m('div.db-container-data', 'db-data'),
         m('div.db-container-status', 'db-status')
-      ]),
-      m(modal)
+      ])
     ])
 }
 

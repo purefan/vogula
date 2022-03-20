@@ -27,6 +27,7 @@
     "webpack-cli": "^4.8.0"
   },
   "dependencies": {
+    "chess-types": "file:../../chess-types/",
     "chessground": "file:../chessground",
     "mithril": "^2.0.4"
   },

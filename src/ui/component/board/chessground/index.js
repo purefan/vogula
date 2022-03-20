@@ -181,9 +181,34 @@ Board.sync = async () => {
     return new Promise(resolve => setTimeout(resolve, 200))
 }
 
-
 // @ts-ignore
 Board.chessjs = new chessjs()
 Board.chessjs.reset()
 
+Board.make_one_off = make_one_off
+
+/**
+ *
+ * @param {Object} param
+ * @param {String} param.fen
+ */
+function make_one_off(param) {
+    const chess = new chessjs(param.fen)
+    const config = {
+        fen: param.fen,
+        viewOnly: true,
+        orientation: letter_to_color[ chess.turn() ]
+    }
+    const board = {
+        oncreate: vnode => Chessground(vnode.dom, config)
+    }
+
+    board.view = () => m('div', {
+        class: 'one_off_board board wood small merida coordinates blue'
+    }, 'board goes here')
+
+    return {
+        view: () => m('div', m(board))
+    }
+}
 export default Board
