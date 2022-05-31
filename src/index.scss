@@ -6,7 +6,8 @@ body {
     color: $text-color;
     height: 100vh;
     margin: 0;
-    padding: 0
+    padding: 0;
+    overflow-y:hidden;
 }
 
 $toolbar-height: 5vh;
@@ -189,7 +190,7 @@ $modal-content-width: 40vw;
     border-radius: 5px;
     min-width: $modal-content-width;
     position: relative;
-    transition: all 5s ease-in-out;
+    transition: all 0.5s ease-in-out;
     padding-top: 6vh;
 }
 
